@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Asset Compass</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
@@ -162,11 +163,29 @@ canvas{max-width:100%;}
   <div class="splash-bar"><i></i></div>
 </div>
 
+<!-- ===== Login ===== -->
+<div id="login" style="display:none;position:fixed;inset:0;background:radial-gradient(circle at 30% 20%, #16243f, #060b14 70%);
+  flex-direction:column;align-items:center;justify-content:center;z-index:998;color:#fff;text-align:center;padding:0 24px;">
+  <div class="logo" style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#3ee08a,#5b8cff);
+    display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;margin-bottom:20px;">✶</div>
+  <h1 style="font-size:20px;font-weight:800;margin:0 0 8px;">Asset Compass</h1>
+  <p style="font-size:13px;color:#9fb0cc;margin:0 0 28px;max-width:280px;line-height:1.6;">계속하려면 Google 계정으로 로그인해주세요.<br>내 자산 데이터는 계정별로 안전하게 저장됩니다.</p>
+  <button id="btnGoogleLogin" style="display:flex;align-items:center;gap:10px;background:#fff;color:#1f1f1f;
+    border:none;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.5-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.5-5.2l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.9 36 44 30.6 44 24c0-1.3-.1-2.5-.4-3.5z"/></svg>
+    Google 계정으로 로그인
+  </button>
+  <div id="loginMsg" style="margin-top:16px;font-size:12px;color:#ff8a93;"></div>
+</div>
+
 <!-- ===== App ===== -->
 <div id="app">
   <header class="topbar">
     <div class="brand"><span class="mark"></span> Asset Compass</div>
-    <div class="fx-badge">💱 USD/KRW <b id="fxRate">-</b></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="fx-badge">💱 USD/KRW <b id="fxRate">-</b></div>
+      <img id="userAvatar" src="" alt="" style="width:30px;height:30px;border-radius:50%;display:none;border:1px solid var(--line);">
+    </div>
   </header>
 
   <main>
@@ -330,6 +349,20 @@ canvas{max-width:100%;}
       <h2 class="page-title">설정</h2>
       <div class="card">
         <div class="set-row">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img id="settingsAvatar" src="" alt="" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--line);">
+            <div>
+              <div style="font-weight:700;" id="settingsUserName">-</div>
+              <div class="muted" style="font-size:12px;" id="settingsUserEmail">-</div>
+            </div>
+          </div>
+        </div>
+        <div class="set-row">
+          <button class="btn-ghost" id="btnLogout" style="margin:0;color:var(--down);width:auto;padding:8px 16px;">로그아웃</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="set-row">
           <div><div style="font-weight:700;">다크 모드</div><div class="muted" style="font-size:12px;">화면 테마를 변경합니다</div></div>
           <div class="switch on" id="themeSwitch"><i></i></div>
         </div>
@@ -347,7 +380,7 @@ canvas{max-width:100%;}
         <h3>정보</h3>
         <div class="muted" style="font-size:13px;line-height:1.7;">
           Asset Compass v1.0<br>해외주식: Finnhub API · 국내주식: Naver 시세(무료, CORS 프록시 경유)<br>
-          데이터는 Firebase Firestore에 저장됩니다.
+          데이터는 계정별로 Firebase Firestore에 저장됩니다.
         </div>
       </div>
     </section>
@@ -379,7 +412,17 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const TX_COL = db.collection("transactions");
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+let currentUser = null;
+let TX_COL = null;      // 로그인 후 사용자별 컬렉션으로 설정됨
+let SNAP_COL = null;
+
+function setUserCollections(uid){
+  TX_COL = db.collection("users").doc(uid).collection("transactions");
+  SNAP_COL = db.collection("users").doc(uid).collection("snapshots");
+}
 
 /* ============================================================
    Constants / API helpers
@@ -551,35 +594,42 @@ document.querySelectorAll("nav.tabbar button").forEach(b=>{
    Firestore load / save (+ 로컬 백업: Firestore 권한 오류 시에도
    데이터가 화면에 반영되도록 localStorage에 임시 보관합니다)
 ============================================================ */
+function pendingKey(){ return "pendingTx_" + (currentUser ? currentUser.uid : "anon"); }
 function getLocalPending(){
-  try{ return JSON.parse(localStorage.getItem("pendingTx") || "[]"); }catch(e){ return []; }
+  try{ return JSON.parse(localStorage.getItem(pendingKey()) || "[]"); }catch(e){ return []; }
 }
-function setLocalPending(arr){ localStorage.setItem("pendingTx", JSON.stringify(arr)); }
+function setLocalPending(arr){ localStorage.setItem(pendingKey(), JSON.stringify(arr)); }
 
 async function loadTransactions(){
   let firestoreDocs = [];
   try{
-    const snap = await TX_COL.orderBy("date","asc").get();
+    const snap = await withTimeout(TX_COL.orderBy("date","asc").get(), 8000);
     firestoreDocs = snap.docs.map(d=>({ id:d.id, ...d.data() }));
   }catch(e){
-    console.error("Firestore 읽기 실패:", e);
+    console.error("Firestore 읽기 실패/지연:", e);
     toast("⚠ 서버 데이터를 불러오지 못했습니다 (" + (e.code||e.message) + ")");
   }
   const pending = getLocalPending();
   transactions = [...firestoreDocs, ...pending].sort((a,b)=> (a.date>b.date?1:-1));
 }
 
-// Firestore에 쓰기를 시도하고, 권한 오류 등으로 실패하면 로컬에 임시 저장합니다.
+// Firestore에 쓰기를 시도하고, 권한 오류나 응답 지연(타임아웃) 시 로컬에 임시 저장합니다.
+function withTimeout(promise, ms){
+  return new Promise((resolve, reject)=>{
+    const timer = setTimeout(()=> reject(new Error("timeout")), ms);
+    promise.then(v=>{ clearTimeout(timer); resolve(v); }, e=>{ clearTimeout(timer); reject(e); });
+  });
+}
 async function saveTransaction(tx){
   try{
-    await TX_COL.add(tx);
+    await withTimeout(TX_COL.add(tx), 8000); // 8초 내 서버 응답이 없으면 로컬 저장으로 전환
     return { ok:true, mode:"server" };
   }catch(e){
-    console.error("Firestore 쓰기 실패:", e);
+    console.error("Firestore 쓰기 실패/지연:", e);
     const pending = getLocalPending();
     pending.push({ ...tx, id: "local_" + Date.now() + "_" + Math.random().toString(36).slice(2) });
     setLocalPending(pending);
-    return { ok:true, mode:"local", error: e };
+    return { ok:true, mode:"local", error: (e.message==="timeout" ? {code:"timeout", message:"서버 응답이 지연되었습니다(네트워크 문제 가능성)"} : e) };
   }
 }
 
@@ -588,7 +638,7 @@ async function saveSnapshotIfNeeded(holdings){
   const totalAsset = holdings.reduce((s,h)=>s+h.valueKRW,0) + getCashTotalKRW();
   const totalCost = holdings.reduce((s,h)=>s+h.costKRW,0) + getCashTotalKRW();
   const id = today;
-  await db.collection("snapshots").doc(id).set({ date: today, asset: totalAsset, cost: totalCost }, {merge:true});
+  await SNAP_COL.doc(id).set({ date: today, asset: totalAsset, cost: totalCost }, {merge:true});
 }
 
 /* ============================================================
@@ -748,7 +798,7 @@ document.querySelectorAll("#sortRow button").forEach(b=>{
 ============================================================ */
 let trendChart;
 async function renderTrend(){
-  const snap = await db.collection("snapshots").orderBy("date","asc").get();
+  const snap = await SNAP_COL.orderBy("date","asc").get();
   let rows = snap.docs.map(d=>d.data());
   const periodDays = {"1m":30,"3m":90,"6m":182,"1y":365,"3y":1095,"5y":1825}[currentTrendPeriod];
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-periodDays);
@@ -855,27 +905,50 @@ document.querySelectorAll("#cashCcySeg button").forEach(b=>{
   });
 });
 
-// 종목명 조회 (국내: 네이버 자동완성 / 해외: Finnhub 심볼 검색)
+// 응답 JSON 구조를 모르더라도 재귀적으로 code/name 쌍을 찾아주는 헬퍼
+function deepFindNameByCode(obj, code, depth){
+  if(depth > 6 || obj === null || obj === undefined) return null;
+  if(Array.isArray(obj)){
+    for(const item of obj){
+      const found = deepFindNameByCode(item, code, depth+1);
+      if(found) return found;
+    }
+    return null;
+  }
+  if(typeof obj === "object"){
+    const codeVal = obj.code ?? obj.cd ?? obj.itemCode ?? obj.symbolCode ?? obj.reutersCode;
+    const nameVal = obj.name ?? obj.nm ?? obj.stockName ?? obj.itemName ?? obj.korName;
+    if(codeVal && String(codeVal).replace(/^A/,"") === code && nameVal) return nameVal;
+    for(const k in obj){
+      const found = deepFindNameByCode(obj[k], code, depth+1);
+      if(found) return found;
+    }
+  }
+  return null;
+}
+
+// 종목명 조회 (국내: 네이버 자동완성/검색 / 해외: Finnhub 심볼 검색)
 async function getStockName(symbol, market){
   if(market === "KR" || isKR(symbol)){
-    const url = `https://ac.stock.naver.com/ac?q=${symbol}&target=stock,index,marketSum`;
-    try{
-      const r = await fetch(corsWrap(url));
-      const d = await r.json();
-      const item = d?.items?.[0]?.[0]?.find?.(x=>x.code===symbol) || d?.items?.[0]?.find?.(x=>x.code===symbol);
-      if(item && item.name) return item.name;
-      // 구조가 다를 경우 첫 항목 사용
-      const flat = (d?.items || []).flat();
-      const found = flat.find(x=>x && x.code === symbol);
-      if(found) return found.name;
-    }catch(e){
+    const urls = [
+      `https://ac.stock.naver.com/ac?q=${symbol}&target=stock,index,marketSum`,
+      `https://m.stock.naver.com/api/json/search/searchListJson.nhn?query=${symbol}`,
+    ];
+    for(const url of urls){
       try{
-        const r2 = await fetch(corsWrapAlt(url));
-        const d2 = await r2.json();
-        const flat = (d2?.items || []).flat();
-        const found = flat.find(x=>x && x.code === symbol);
-        if(found) return found.name;
-      }catch(e2){}
+        let text;
+        try{
+          const r = await fetch(corsWrap(url));
+          if(!r.ok) throw new Error("proxy1 http error");
+          text = await r.text();
+        }catch(e){
+          const r2 = await fetch(corsWrapAlt(url));
+          text = await r2.text();
+        }
+        const d = JSON.parse(text);
+        const found = deepFindNameByCode(d, symbol, 0);
+        if(found) return found;
+      }catch(e){ /* 다음 URL로 시도 */ }
     }
     return null;
   } else {
@@ -1045,8 +1118,10 @@ document.getElementById("btnClear").addEventListener("click", async ()=>{
   try{
     const snap = await TX_COL.get();
     await Promise.all(snap.docs.map(d=>d.ref.delete()));
+    const snapSnap = await SNAP_COL.get();
+    await Promise.all(snapSnap.docs.map(d=>d.ref.delete()));
   }catch(e){ console.error("서버 데이터 삭제 실패:", e); }
-  localStorage.removeItem("pendingTx");
+  localStorage.removeItem(pendingKey());
   await reloadAll();
   toast("삭제되었습니다.");
 });
@@ -1066,10 +1141,60 @@ async function reloadAll(){
   renderTxList();
 }
 
-function hideSplash(){
-  document.getElementById("splash").style.display="none";
-  document.getElementById("app").style.display="flex";
+function updateUserUI(user){
+  const avatar = document.getElementById("userAvatar");
+  avatar.src = user.photoURL || "";
+  avatar.style.display = user.photoURL ? "block" : "none";
+  document.getElementById("settingsAvatar").src = user.photoURL || "";
+  document.getElementById("settingsUserName").textContent = user.displayName || "사용자";
+  document.getElementById("settingsUserEmail").textContent = user.email || "";
 }
+
+function showLogin(){
+  document.getElementById("splash").style.display = "none";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login").style.display = "flex";
+}
+
+async function enterApp(){
+  document.getElementById("splash").style.display = "none";
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  try{ await loadFx(); }catch(e){ console.error("FX load failed", e); }
+  try{ await reloadAll(); }catch(e){
+    console.error("reloadAll failed", e);
+    toast("일부 데이터를 불러오지 못했습니다. 설정 탭에서 새로고침 해보세요.");
+  }
+}
+
+let splashDone = false;
+auth.onAuthStateChanged((user)=>{
+  currentUser = user;
+  if(user){
+    setUserCollections(user.uid);
+    updateUserUI(user);
+    if(splashDone) enterApp();
+  } else {
+    TX_COL = null; SNAP_COL = null;
+    if(splashDone) showLogin();
+  }
+});
+
+document.getElementById("btnGoogleLogin").addEventListener("click", async ()=>{
+  const msg = document.getElementById("loginMsg");
+  msg.textContent = "";
+  try{
+    await auth.signInWithPopup(googleProvider);
+  }catch(e){
+    console.error(e);
+    msg.textContent = "로그인에 실패했습니다: " + (e.message || e.code || "알 수 없는 오류");
+  }
+});
+
+document.getElementById("btnLogout").addEventListener("click", async ()=>{
+  if(!confirm("로그아웃 하시겠습니까?")) return;
+  await auth.signOut();
+});
 
 (function init(){
   // default dates = today
@@ -1077,17 +1202,11 @@ function hideSplash(){
   document.getElementById("inpDate").value = today;
   document.getElementById("inpCashDate").value = today;
 
-  // 스플래시는 데이터 로딩 성공 여부와 상관없이 5초 후 무조건 사라집니다.
-  setTimeout(hideSplash, 5000);
-
-  // 데이터 로딩은 별도로 진행하고, 실패해도 앱 자체는 항상 뜨도록 처리합니다.
-  (async ()=>{
-    try{ await loadFx(); }catch(e){ console.error("FX load failed", e); }
-    try{ await reloadAll(); }catch(e){
-      console.error("reloadAll failed", e);
-      toast("일부 데이터를 불러오지 못했습니다. 설정 탭에서 새로고침 해보세요.");
-    }
-  })();
+  // 스플래시는 5초 후 무조건 사라지고, 그 시점의 로그인 상태에 따라 앱 또는 로그인 화면을 보여줍니다.
+  setTimeout(()=>{
+    splashDone = true;
+    if(currentUser) enterApp(); else showLogin();
+  }, 5000);
 })();
 </script>
 </body>
