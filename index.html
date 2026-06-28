@@ -412,6 +412,9 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+// 일부 네트워크(방화벽/사내망/특정 ISP)에서 Firestore의 기본 실시간 연결(WebChannel)이
+// 막혀 쓰기/읽기가 끝없이 대기하는 문제가 있어, 자동으로 long-polling으로 전환하도록 설정합니다.
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 const auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
