@@ -414,7 +414,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 // 일부 네트워크(방화벽/사내망/특정 ISP)에서 Firestore의 기본 실시간 연결(WebChannel)이
 // 막혀 쓰기/읽기가 끝없이 대기하는 문제가 있어, 자동으로 long-polling으로 전환하도록 설정합니다.
-db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+db.settings({ experimentalForceLongPolling: true, merge: true });
 const auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -516,12 +516,19 @@ async function getPriceOnDate(symbol, market, dateStr){
     const before = rows.filter(r => r.t <= dateStr);
     return before.length ? before[before.length-1].c : rows[rows.length-1].c; // 영업일이 아니면 가장 가까운 이전 거래일 종가 사용
   } else {
-    const ts = Math.floor(new Date(dateStr).getTime()/1000);
-    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${ts-86400*6}&to=${ts+86400}&token=${FINNHUB_KEY}`);
-    const d = await r.json();
-    if(d.s === "ok" && d.c && d.c.length) return d.c[d.c.length-1];
-    const q = await getQuote(symbol, "US");
-    return q.price;
+    const target = new Date(dateStr);
+    const diffDays = Math.ceil((Date.now() - target.getTime()) / 86400000) + 10;
+    const range = rangeForDays(Math.max(diffDays, 30));
+    const rows = await fetchYahooChart(symbol, range, "1d");
+    if(rows.length === 0){
+      // Yahoo도 실패하면 마지막으로 현재가로 대체
+      const q = await getQuote(symbol, "US");
+      return q.price;
+    }
+    const exact = rows.find(r => r.t === dateStr);
+    if(exact) return exact.c;
+    const before = rows.filter(r => r.t <= dateStr);
+    return before.length ? before[before.length-1].c : rows[rows.length-1].c;
   }
 }
 
@@ -533,12 +540,10 @@ async function getCandles(symbol, market, days){
     const cutoff = daysAgo(days);
     return rows.filter(r => new Date(r.t) >= cutoff);
   } else {
-    const to = Math.floor(Date.now()/1000);
-    const from = to - days*86400;
-    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_KEY}`);
-    const d = await r.json();
-    if(d.s !== "ok") return [];
-    return d.t.map((t,i)=>({ t: new Date(t*1000).toISOString().slice(0,10), c: d.c[i] }));
+    const range = rangeForDays(days + 5);
+    const rows = await fetchYahooChart(symbol, range, "1d");
+    const cutoff = daysAgo(days);
+    return rows.filter(r => new Date(r.t) >= cutoff);
   }
 }
 function fmtNaverDate(d){ return d.toISOString().slice(0,10).replace(/-/g,''); }
