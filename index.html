@@ -1,2306 +1,1094 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Wardrobe">
-  <meta name="theme-color" content="#0a0a0a">
-  <title>My Wardrobe - Personal Style Manager</title>
-  
-  <!-- App Icons -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a96e'/%3E%3Cstop offset='1' stop-color='%23a8864a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='%230a0a0a'/%3E%3Cpath d='M256 120c-60 0-100 30-100 80v192h200V200c0-50-40-80-100-80z' fill='url(%23g)'/%3E%3Crect x='156' y='200' width='80' height='192' fill='%230a0a0a' opacity='0.15'/%3E%3Crect x='276' y='200' width='80' height='192' fill='%230a0a0a' opacity='0.15'/%3E%3Cpath d='M200 120h112c8 0 15 7 15 15s-7 15-15 15H200c-8 0-15-7-15-15s7-15 15-15z' fill='%23c9a96e'/%3E%3Ccircle cx='200' cy='180' r='8' fill='%23c9a96e'/%3E%3Ccircle cx='256' cy='180' r='8' fill='%23c9a96e'/%3E%3Ccircle cx='312' cy='180' r='8' fill='%23c9a96e'/%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a96e'/%3E%3Cstop offset='1' stop-color='%23a8864a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='%230a0a0a'/%3E%3Cpath d='M256 120c-60 0-100 30-100 80v192h200V200c0-50-40-80-100-80z' fill='url(%23g)'/%3E%3Crect x='156' y='200' width='80' height='192' fill='%230a0a0a' opacity='0.15'/%3E%3Crect x='276' y='200' width='80' height='192' fill='%230a0a0a' opacity='0.15'/%3E%3Cpath d='M200 120h112c8 0 15 7 15 15s-7 15-15 15H200c-8 0-15-7-15-15s7-15 15-15z' fill='%23c9a96e'/%3E%3Ccircle cx='200' cy='180' r='8' fill='%23c9a96e'/%3E%3Ccircle cx='256' cy='180' r='8' fill='%23c9a96e'/%3E%3Ccircle cx='312' cy='180' r='8' fill='%23c9a96e'/%3E%3C/svg%3E">
-  
-  <!-- Manifest for PWA -->
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTXkgV2FyZHJvYmUiLCJzaG9ydF9uYW1lIjoiV2FyZHJvYmUiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMicmM0UlM0NyZWN0IHdpZHRoPSc1MTInIGhlaWdodD0nNTEyJyBmaWxsPSclMjMwYTBhMGEnLyUzRSUzQ3BhdGggZD0nTTI1NiAxMjBjLTYwIDAtMTAwIDMwLTEwMCA4MHYxOTJoMjAwVjIwMGMwLTUwLTQwLTgwLTEwMC04MHonIGZpbGw9JyUyM2M5YTk2ZScvJTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap');
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      position: fixed;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    body {
-      font-family: 'Georgia', serif;
-      overscroll-behavior: none;
-      padding-top: env(safe-area-inset-top);
-    }
-    
-    body.theme-dark {
-      background: #0a0a0a;
-      color: #f5f0e8;
-    }
-    
-    body.theme-light {
-      background: #fafafa;
-      color: #1a1a1a;
-    }
-    
-    body.theme-blue {
-      background: #0f1419;
-      color: #e7f0ff;
-    }
-    
-    body.theme-forest {
-      background: #0d1b0d;
-      color: #e8f5e8;
-    }
-    
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
-    
-    :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #0f0f0f;
-      --bg-tertiary: #151515;
-      --text-primary: #f5f0e8;
-      --text-secondary: #999;
-      --text-tertiary: #666;
-      --border-color: #222;
-      --accent-color: #c9a96e;
-      --accent-hover: #a8864a;
-    }
-    
-    body.theme-light {
-      --bg-primary: #fafafa;
-      --bg-secondary: #ffffff;
-      --bg-tertiary: #f0f0f0;
-      --text-primary: #1a1a1a;
-      --text-secondary: #666;
-      --text-tertiary: #999;
-      --border-color: #e0e0e0;
-      --accent-color: #c9a96e;
-      --accent-hover: #a8864a;
-    }
-    
-    body.theme-blue {
-      --bg-primary: #0f1419;
-      --bg-secondary: #1a1f26;
-      --bg-tertiary: #252b33;
-      --text-primary: #e7f0ff;
-      --text-secondary: #8899aa;
-      --text-tertiary: #556677;
-      --border-color: #2a3340;
-      --accent-color: #5ea3d0;
-      --accent-hover: #4a8ab8;
-    }
-    
-    body.theme-forest {
-      --bg-primary: #0d1b0d;
-      --bg-secondary: #162616;
-      --bg-tertiary: #1f311f;
-      --text-primary: #e8f5e8;
-      --text-secondary: #99bb99;
-      --text-tertiary: #667766;
-      --border-color: #2a3d2a;
-      --accent-color: #7cb87c;
-      --accent-hover: #6a9d6a;
-    }
-    
-    .app-container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-    
-    .scrollable {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-    
-    .tab-btn {
-      cursor: pointer;
-      letter-spacing: 0.2em;
-      transition: all 0.3s;
-      border: none;
-      background: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    .tab-btn:hover { opacity: 0.7; }
-    .tab-btn:active { transform: scale(0.95); }
-    
-    .cat-btn, .season-btn, .ai-btn, .add-item-btn {
-      cursor: pointer;
-      transition: all 0.3s;
-      border: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    .cat-btn:hover { transform: translateY(-2px); }
-    .cat-btn:active { transform: scale(0.95); }
-    
-    .item-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: 4px;
-    }
-    
-    .item-card:hover .delete-btn { opacity: 1; }
-    
-    .delete-btn {
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    
-    @media (hover: none) {
-      .delete-btn { opacity: 1; }
-    }
-    
-    .upload-zone {
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    
-    .upload-zone:hover {
-      border-color: var(--accent-color) !important;
-      background: color-mix(in srgb, var(--accent-color) 5%, transparent) !important;
-    }
-    
-    .season-btn:hover { transform: scale(1.02); }
-    .season-btn:active { transform: scale(0.98); }
-    
-    .outfit-card {
-      animation: fadeUp 0.5s ease both;
-    }
-    
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .outfit-card:nth-child(2) { animation-delay: 0.1s; }
-    .outfit-card:nth-child(3) { animation-delay: 0.2s; }
-    
-    .ai-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-color) 40%, transparent);
-    }
-    
-    .ai-btn:active:not(:disabled) { transform: scale(0.98); }
-    .ai-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    
-    .pulse {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .auth-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: var(--bg-primary);
-    }
-    
-    .auth-box {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 40px;
-      max-width: 400px;
-      width: 100%;
-    }
-    
-    .auth-input {
-      width: 100%;
-      padding: 14px 16px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-      color: var(--text-primary);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 13px;
-      margin-bottom: 12px;
-      transition: all 0.3s;
-    }
-    
-    .auth-input:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      background: var(--bg-tertiary);
-    }
-    
-    .auth-btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-      color: var(--bg-primary);
-      border: none;
-      border-radius: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 10px;
-    }
-    
-    .auth-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px color-mix(in srgb, var(--accent-color) 40%, transparent);
-    }
-    
-    .auth-btn:active { transform: scale(0.98); }
-    
-    .auth-btn.secondary {
-      background: var(--bg-tertiary);
-      color: var(--accent-color);
-      border: 1px solid var(--accent-color);
-    }
-    
-    .error-msg {
-      color: #ff6b6b;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 11px;
-      text-align: center;
-      margin-top: 10px;
-    }
-    
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-    }
-    
-    .logout-btn {
-      padding: 6px 12px;
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .logout-btn:hover {
-      border-color: var(--accent-color);
-      color: var(--accent-color);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Asset Compass</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b1320; --bg2:#101a2c; --card:#141f33; --card2:#19253c;
+  --line:#22324d; --text:#eef2f8; --sub:#8ea0bd; --accent:#3ee08a;
+  --accent2:#5b8cff; --down:#ff5d6c; --up:#3ee08a; --gold:#e0b03e;
+  --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.35);
+  font-family:'Pretendard','-apple-system',BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5f9; --bg2:#ffffff; --card:#ffffff; --card2:#f7f9fc;
+  --line:#e3e8f0; --text:#152035; --sub:#6b7a93; --accent:#1aa05a;
+  --accent2:#3a66e0; --down:#e0394f; --up:#1aa05a; --gold:#b3811f;
+  --shadow:0 8px 20px rgba(20,30,50,.08);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);}
+body{display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;}
+a,button,input,select{font-family:inherit;}
+.hidden{display:none !important;}
 
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-      animation: fadeIn 0.2s ease;
-      overflow-y: auto;
-    }
+/* ===== Splash ===== */
+#splash{position:fixed;inset:0;background:radial-gradient(circle at 30% 20%, #16243f, #060b14 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;color:#fff;}
+#splash .logo{width:84px;height:84px;border-radius:22px;background:linear-gradient(135deg,#3ee08a,#5b8cff);
+  display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;
+  box-shadow:0 0 60px rgba(91,140,255,.45);animation:pulse 1.8s ease-in-out infinite;margin-bottom:22px;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+#splash h1{font-size:22px;font-weight:800;letter-spacing:.5px;margin:0 0 6px;}
+#splash p{font-size:13px;color:#9fb0cc;margin:0 0 26px;text-align:center;max-width:280px;line-height:1.6;}
+.splash-bar{width:200px;height:4px;background:#1c2940;border-radius:4px;overflow:hidden;}
+.splash-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#3ee08a,#5b8cff);
+  animation:load 5s linear forwards;}
+@keyframes load{to{width:100%;}}
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+/* ===== App shell ===== */
+#app{display:none;flex:1;flex-direction:column;min-height:100vh;}
+header.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--line);}
+header.topbar .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;}
+header.topbar .brand .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#3ee08a,#5b8cff);}
+.fx-badge{font-size:12px;color:var(--sub);background:var(--card2);border:1px solid var(--line);
+  padding:6px 10px;border-radius:20px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.fx-badge b{color:var(--text);font-weight:700;}
 
-    .modal-box {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 32px;
-      max-width: 500px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      animation: slideUp 0.3s ease;
-      margin: auto;
-    }
+main{flex:1;padding:16px 16px 90px;max-width:560px;margin:0 auto;width:100%;}
+.page{display:none;animation:fadein .25s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+h2.page-title{font-size:19px;font-weight:800;margin:4px 0 16px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;
+  margin-bottom:14px;box-shadow:var(--shadow);}
+.card h3{margin:0 0 12px;font-size:14px;color:var(--sub);font-weight:600;}
+.row{display:flex;justify-content:space-between;align-items:center;}
+.muted{color:var(--sub);}
+.big{font-size:26px;font-weight:800;letter-spacing:-.5px;}
+.tag{font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;}
+.tag.up{color:var(--up);background:rgba(62,224,138,.12);}
+.tag.down{color:var(--down);background:rgba(255,93,108,.12);}
 
-    .icon-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-      gap: 8px;
-      margin: 16px 0;
-    }
+/* nav */
+nav.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;background:var(--bg2);
+  border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+nav.tabbar button{flex:1;background:none;border:none;color:var(--sub);font-size:11px;font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;border-radius:10px;}
+nav.tabbar button .ic{font-size:18px;}
+nav.tabbar button.active{color:var(--accent);background:rgba(62,224,138,.08);}
 
-    .icon-btn {
-      padding: 12px;
-      background: var(--bg-primary);
-      border: 2px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 24px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+/* dashboard pies */
+.pie-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.pie-tabs button{flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+  color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;}
+.pie-tabs button.active{background:var(--accent);color:#06150d;border-color:var(--accent);}
+.legend{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.legend .li{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 0;
+  border-bottom:1px solid var(--line);}
+.legend .li:last-child{border-bottom:none;}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;}
+.legend .lbl{display:flex;align-items:center;}
 
-    .icon-btn:hover {
-      border-color: var(--accent-color);
-      background: var(--bg-tertiary);
-    }
+/* holdings list */
+.sort-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;}
+.sort-row button{flex:0 0 auto;font-size:12px;padding:7px 11px;border-radius:20px;border:1px solid var(--line);
+  background:var(--card2);color:var(--sub);cursor:pointer;white-space:nowrap;}
+.sort-row button.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.holding{display:flex;justify-content:space-between;align-items:center;padding:13px 0;
+  border-bottom:1px solid var(--line);cursor:pointer;}
+.holding:last-child{border-bottom:none;}
+.holding .name{font-weight:700;font-size:14px;}
+.holding .sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.holding .right{text-align:right;}
+.holding .val{font-weight:700;font-size:14px;}
+.holding .pct{font-size:12px;margin-top:2px;}
 
-    .icon-btn.selected {
-      border-color: var(--accent-color);
-      background: var(--bg-tertiary);
-    }
+/* trend */
+.period-row{display:flex;gap:6px;margin-bottom:14px;}
+.period-row button{flex:1;padding:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+  color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;}
+.period-row button.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
 
-    .edit-cat-btn, .delete-cat-btn {
-      padding: 4px 8px;
-      background: transparent;
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-      color: var(--text-secondary);
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-left: 4px;
-    }
+/* form */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:600;}
+.field input, .field select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card2);color:var(--text);font-size:14px;}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.seg button{flex:1;padding:10px 0;background:var(--card2);color:var(--sub);border:none;font-weight:700;
+  font-size:13px;cursor:pointer;}
+.seg button.active{background:var(--accent2);color:#fff;}
+.btn-primary{width:100%;padding:13px 0;border-radius:12px;border:none;background:var(--accent);
+  color:#06150d;font-weight:800;font-size:15px;cursor:pointer;margin-top:6px;}
+.btn-primary:disabled{opacity:.5;}
+.btn-ghost{width:100%;padding:11px 0;border-radius:12px;border:1px solid var(--line);background:transparent;
+  color:var(--sub);font-weight:700;font-size:13px;cursor:pointer;margin-top:8px;}
+.hint{font-size:12px;color:var(--sub);margin-top:6px;}
+.price-preview{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  font-size:13px;margin-top:-4px;margin-bottom:14px;color:var(--sub);}
+.price-preview b{color:var(--text);}
 
-    .edit-cat-btn:hover {
-      border-color: var(--accent-color);
-      color: var(--accent-color);
-    }
+/* settings */
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;
+  border-bottom:1px solid var(--line);}
+.set-row:last-child{border-bottom:none;}
+.switch{width:48px;height:28px;border-radius:20px;background:var(--line);position:relative;cursor:pointer;}
+.switch i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;
+  transition:.2s;}
+.switch.on{background:var(--accent);}
+.switch.on i{left:23px;}
 
-    .delete-cat-btn:hover {
-      border-color: #f55;
-      color: #f55;
-    }
+/* back header */
+.backbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.backbar button{background:var(--card2);border:1px solid var(--line);color:var(--text);width:34px;height:34px;
+  border-radius:10px;font-size:16px;cursor:pointer;}
 
-    .add-item-btn {
-      padding: 8px 16px;
-      background: transparent;
-      border: 1px solid var(--accent-color);
-      border-radius: 2px;
-      color: var(--accent-color);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .add-item-btn:hover {
-      background: var(--accent-color);
-      color: var(--bg-primary);
-      transform: translateY(-1px);
-    }
-
-    .season-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: var(--bg-primary);
-    }
-
-    .season-tag.selected {
-      border-color: var(--accent-color);
-      background: var(--accent-color);
-      color: var(--bg-primary);
-    }
-
-    .season-tag:hover {
-      border-color: var(--accent-color);
-    }
-
-    .preview-image {
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 4px;
-      background: var(--bg-primary);
-      margin-bottom: 16px;
-    }
-
-    .item-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .meta-tag {
-      padding: 3px 8px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 8px;
-      letter-spacing: 0.1em;
-      color: var(--text-secondary);
-    }
-
-    .category-edit-item {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .category-edit-item:hover {
-      border-color: var(--accent-color);
-    }
-
-    .ref-image-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .ref-image-item {
-      position: relative;
-      aspect-ratio: 1;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 2px solid var(--border-color);
-      cursor: pointer;
-    }
-
-    .ref-image-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .ref-image-remove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: rgba(0,0,0,0.8);
-      color: #fff;
-      border: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .theme-selector {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .theme-option {
-      padding: 16px;
-      border: 2px solid var(--border-color);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .theme-option:hover {
-      border-color: var(--accent-color);
-    }
-
-    .theme-option.selected {
-      border-color: var(--accent-color);
-      background: var(--bg-tertiary);
-    }
-
-    .color-input-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .color-input-group > div {
-      flex: 1;
-    }
-    
-    @media (max-width: 768px) {
-      .auth-box { padding: 30px 20px; }
-      .modal-box { padding: 24px 16px; }
-      .user-badge {
-        flex-direction: column;
-        gap: 4px;
-      }
-      body {
-        padding-top: max(20px, env(safe-area-inset-top));
-      }
-    }
-  </style>
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b2a44;color:#fff;
+  padding:10px 18px;border-radius:30px;font-size:13px;z-index:200;box-shadow:var(--shadow);opacity:0;
+  transition:.25s;pointer-events:none;}
+#toast.show{opacity:1;}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;}
+.spinner{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--accent2);
+  border-radius:50%;display:inline-block;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+canvas{max-width:100%;}
+</style>
 </head>
-<body class="theme-dark">
-  <div id="root"></div>
+<body>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
+<!-- ===== Splash ===== -->
+<div id="splash">
+  <div class="logo">✶</div>
+  <h1>Asset Compass</h1>
+  <p>주식과 현금을 한곳에서, 종목·섹터별 비중부터 추이까지 한눈에 살펴보는 나만의 자산 대시보드</p>
+  <div class="splash-bar"><i></i></div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAh2GUyt2NDSo-dlbltr45lHzF-RPyGUBQ",
-      authDomain: "coordination-41404.firebaseapp.com",
-      projectId: "coordination-41404",
-      storageBucket: "coordination-41404.firebasestorage.app",
-      messagingSenderId: "606272143017",
-      appId: "1:606272143017:web:97450495f469c28e69b3b8",
-      measurementId: "G-M3MNF8CWSY"
-    };
+<!-- ===== App ===== -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span> Asset Compass</div>
+    <div class="fx-badge">💱 USD/KRW <b id="fxRate">-</b></div>
+  </header>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const googleProvider = new GoogleAuthProvider();
+  <main>
+    <!-- DASHBOARD -->
+    <section class="page" id="page-dashboard">
+      <h2 class="page-title">대시보드</h2>
+      <div class="pie-tabs">
+        <button class="active" data-pie="type">유형별</button>
+        <button data-pie="sector">섹터별</button>
+        <button data-pie="stock">종목별</button>
+      </div>
+      <div class="card">
+        <canvas id="pieChart" height="260"></canvas>
+        <div class="legend" id="pieLegend"></div>
+      </div>
+    </section>
 
-    const DEFAULT_CATEGORIES = [
-      { id: "TOPS", label: "TOPS", icon: "👔" },
-      { id: "T-SHIRTS", label: "T-SHIRTS", icon: "👕" },
-      { id: "PANTS", label: "PANTS", icon: "👖" },
-      { id: "OUTER", label: "OUTER", icon: "🧥" },
-      { id: "HEAVY OUTER", label: "HEAVY OUTER", icon: "🧣" },
-      { id: "SHOES", label: "SHOES", icon: "👟" },
-      { id: "BAG", label: "BAG", icon: "👜" },
-      { id: "ACCESSORY", label: "ACCESSORY", icon: "💍" },
-    ];
+    <!-- ASSETS -->
+    <section class="page" id="page-assets">
+      <h2 class="page-title">자산</h2>
+      <div class="card">
+        <h3>총자산</h3>
+        <div class="big" id="totalAssets">-</div>
+      </div>
+      <div class="card">
+        <h3>총수익</h3>
+        <div class="big" id="totalProfit">-</div>
+        <div class="tag" id="totalProfitPct">-</div>
+      </div>
+      <div class="card">
+        <h3>일간수익</h3>
+        <div class="big" id="dailyProfit">-</div>
+        <div class="tag" id="dailyProfitPct">-</div>
+      </div>
+      <div class="card">
+        <h3>보유 종목</h3>
+        <div class="sort-row" id="sortRow">
+          <button class="active" data-sort="value-desc">평가액↓</button>
+          <button data-sort="value-asc">평가액↑</button>
+          <button data-sort="profit-desc">총수익↓</button>
+          <button data-sort="profit-asc">총수익↑</button>
+          <button data-sort="rate-desc">수익률↓</button>
+          <button data-sort="rate-asc">수익률↑</button>
+        </div>
+        <div id="holdingsList"><div class="empty">보유 종목이 없습니다. 입력 탭에서 추가해보세요.</div></div>
+      </div>
+    </section>
 
-    const ICON_OPTIONS = [
-      "👔", "👕", "👖", "👗", "👘", "👙", "👚", 
-      "🧥", "🧣", "🧤", "🧦", "👟", "👞", "👠",
-      "👡", "👢", "👑", "🎩", "🧢", "👒", "🎓",
-      "💍", "💎", "📿", "👜", "👝", "🎒", "👓",
-      "🕶️", "🥾", "🥿", "🩱", "🩳", "🩲", "👘",
-      "🎀", "🌂", "☂️", "⌚", "🔗", "🧷"
-    ];
+    <!-- TREND -->
+    <section class="page" id="page-trend">
+      <h2 class="page-title">추이</h2>
+      <div class="period-row" id="periodRow">
+        <button data-p="1m" class="active">1개월</button>
+        <button data-p="3m">3개월</button>
+        <button data-p="6m">6개월</button>
+        <button data-p="1y">1년</button>
+        <button data-p="3y">3년</button>
+        <button data-p="5y">5년</button>
+      </div>
+      <div class="card">
+        <canvas id="trendChart" height="240"></canvas>
+        <div class="legend" style="margin-top:10px;">
+          <div class="li"><span class="lbl"><span class="dot" style="background:#5b8cff;"></span>자산(평가금액)</span><span id="trendAssetNow">-</span></div>
+          <div class="li"><span class="lbl"><span class="dot" style="background:#e0b03e;"></span>원금(매수금액)</span><span id="trendCostNow">-</span></div>
+        </div>
+      </div>
+    </section>
 
-    const SEASONS = [
-      { id: "spring", label: "봄", en: "SPRING", color: "#f9a8d4", bg: "#fdf2f8", emoji: "🌸" },
-      { id: "summer", label: "여름", en: "SUMMER", color: "#34d399", bg: "#f0fdf4", emoji: "☀️" },
-      { id: "fall", label: "가을", en: "FALL", color: "#fb923c", bg: "#fff7ed", emoji: "🍂" },
-      { id: "winter", label: "겨울", en: "WINTER", color: "#60a5fa", bg: "#eff6ff", emoji: "❄️" },
-    ];
+    <!-- STOCK DETAIL -->
+    <section class="page" id="page-stock">
+      <div class="backbar"><button onclick="goTab('assets')">←</button><h2 class="page-title" style="margin:0;" id="stockTitle">종목</h2></div>
+      <div class="card">
+        <div class="row"><div class="muted" id="stockSub">-</div><div class="tag" id="stockChg">-</div></div>
+        <div class="big" id="stockPrice" style="margin-top:8px;">-</div>
+        <div class="period-row" id="stockPeriodRow" style="margin-top:14px;">
+          <button data-sp="1m" class="active">1개월</button>
+          <button data-sp="3m">3개월</button>
+          <button data-sp="6m">6개월</button>
+          <button data-sp="1y">1년</button>
+        </div>
+        <canvas id="stockChart" height="220"></canvas>
+      </div>
+      <div class="card" id="stockHoldingCard"></div>
+    </section>
 
-    const THEMES = [
-      { id: 'dark', label: 'Dark', emoji: '🌙' },
-      { id: 'light', label: 'Light', emoji: '☀️' },
-      { id: 'blue', label: 'Blue', emoji: '🌊' },
-      { id: 'forest', label: 'Forest', emoji: '🌲' }
-    ];
-
-    let state = {
-      user: null,
-      authMode: 'login',
-      email: '',
-      password: '',
-      error: '',
-      tab: 'wardrobe',
-      activeCategory: 'TOPS',
-      categories: [...DEFAULT_CATEGORIES],
-      wardrobe: {},
-      activeSeason: 'spring',
-      outfits: {},
-      loading: false,
-      syncing: false,
-      modal: null,
-      editingCategory: null,
-      newCategoryName: '',
-      newCategoryIcon: '👔',
-      newItem: {
-        image: null,
-        name: '',
-        seasons: [],
-        color: '',
-        brand: ''
-      },
-      aiReference: {
-        images: [],
-        topColor: '',
-        bottomColor: ''
-      },
-      settings: {
-        theme: 'dark'
-      }
-    };
-
-    let unsubscribeFirestore = null;
-    let isSavingItem = false; // 아이템 저장 중 플래그
-
-    // 이미지를 Firebase Storage에 업로드
-    async function uploadImageToStorage(base64Image, path) {
-      try {
-        const storageRef = ref(storage, path);
-        await uploadString(storageRef, base64Image, 'data_url');
-        const downloadURL = await getDownloadURL(storageRef);
-        return downloadURL;
-      } catch (error) {
-        console.error('Image upload error:', error);
-        throw error;
-      }
-    }
-
-    // Storage에서 이미지 삭제
-    async function deleteImageFromStorage(imageUrl) {
-      try {
-        // Firebase Storage URL에서 path 추출
-        if (!imageUrl.includes('firebasestorage.googleapis.com')) {
-          return; // Firebase Storage URL이 아니면 무시
-        }
-        const storageRef = ref(storage, imageUrl);
-        await deleteObject(storageRef);
-      } catch (error) {
-        console.error('Image delete error:', error);
-      }
-    }
-
-    // Apply theme
-    function applyTheme(theme) {
-      document.body.className = `theme-${theme}`;
-    }
-
-    function render() {
-      const root = document.getElementById('root');
-      
-      if (!state.user) {
-        root.innerHTML = renderAuth();
-        attachAuthListeners();
-      } else {
-        root.innerHTML = renderApp();
-        attachAppListeners();
-      }
-    }
-
-    function renderAuth() {
-      const isLogin = state.authMode === 'login';
-      return `
-        <div class="auth-container">
-          <div class="auth-box">
-            <div style="text-align: center; margin-bottom: 32px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="80" height="80" style="margin-bottom: 16px;">
-                <defs>
-                  <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="var(--accent-color)"/>
-                    <stop offset="1" stop-color="var(--accent-hover)"/>
-                  </linearGradient>
-                </defs>
-                <path d="M60 28c-14 0-23 7-23 19v45h46V47c0-12-9-19-23-19z" fill="url(#gradient)"/>
-                <rect x="37" y="47" width="19" height="45" fill="var(--bg-primary)" opacity="0.15"/>
-                <rect x="64" y="47" width="19" height="45" fill="var(--bg-primary)" opacity="0.15"/>
-                <path d="M47 28h26c2 0 4 2 4 4s-2 3-4 3H47c-2 0-4-1-4-3s2-4 4-4z" fill="var(--accent-color)"/>
-                <circle cx="47" cy="42" r="2" fill="var(--accent-color)"/>
-                <circle cx="60" cy="42" r="2" fill="var(--accent-color)"/>
-                <circle cx="73" cy="42" r="2" fill="var(--accent-color)"/>
-              </svg>
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.4em; color: var(--accent-color); margin-bottom: 4px;">MY PERSONAL</div>
-              <div style="font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300;">Wardrobe</div>
-            </div>
-            
-            <input 
-              type="email" 
-              class="auth-input" 
-              id="emailInput" 
-              placeholder="EMAIL" 
-              value="${state.email}"
-              autocomplete="email"
-            />
-            <input 
-              type="password" 
-              class="auth-input" 
-              id="passwordInput" 
-              placeholder="PASSWORD" 
-              value="${state.password}"
-              autocomplete="${isLogin ? 'current-password' : 'new-password'}"
-            />
-            
-            <button class="auth-btn" id="primaryAuthBtn">
-              ${isLogin ? '✦ 로그인' : '✦ 회원가입'}
-            </button>
-            
-            <button class="auth-btn secondary" id="googleAuthBtn">
-              G Google로 ${isLogin ? '로그인' : '가입'}
-            </button>
-            
-            <div style="text-align: center; margin-top: 20px;">
-              <button 
-                id="toggleAuthMode" 
-                style="background: none; border: none; color: var(--text-secondary); font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.1em; cursor: pointer; text-decoration: underline;"
-              >
-                ${isLogin ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
-              </button>
-            </div>
-            
-            ${state.error ? `<div class="error-msg">${state.error}</div>` : ''}
+    <!-- INPUT -->
+    <section class="page" id="page-input">
+      <h2 class="page-title">매수 입력</h2>
+      <div class="card">
+        <div class="field">
+          <label>자산 유형</label>
+          <div class="seg" id="assetTypeSeg">
+            <button class="active" data-type="stock">주식</button>
+            <button data-type="cash">현금</button>
           </div>
         </div>
-      `;
-    }
 
-    function renderApp() {
-      const currentItems = state.wardrobe[state.activeCategory] || [];
-      const totalItems = Object.values(state.wardrobe).flat().length;
-      const season = SEASONS.find(s => s.id === state.activeSeason);
-      const currentOutfits = state.outfits[state.activeSeason] || [];
-
-      return `
-        <div class="app-container">
-          <header style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); flex-shrink: 0;">
-            <div>
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.4em; color: var(--accent-color); margin-bottom: 2px;">MY PERSONAL</div>
-              <div style="font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300;">Wardrobe</div>
-            </div>
-            <div class="user-badge">
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--text-secondary);">${state.user.email}</div>
-            </div>
-          </header>
-
-          <nav style="display: flex; gap: 0; border-bottom: 1px solid var(--border-color); background: var(--bg-primary); flex-shrink: 0;">
-            <button 
-              class="tab-btn" 
-              data-tab="wardrobe"
-              style="flex: 1; padding: 18px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: ${state.tab === 'wardrobe' ? '600' : '400'}; color: ${state.tab === 'wardrobe' ? 'var(--accent-color)' : 'var(--text-tertiary)'}; border-bottom: ${state.tab === 'wardrobe' ? '2px solid var(--accent-color)' : '2px solid transparent'};"
-            >
-              CLOSET
-            </button>
-            <button 
-              class="tab-btn" 
-              data-tab="outfit"
-              style="flex: 1; padding: 18px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: ${state.tab === 'outfit' ? '600' : '400'}; color: ${state.tab === 'outfit' ? 'var(--accent-color)' : 'var(--text-tertiary)'}; border-bottom: ${state.tab === 'outfit' ? '2px solid var(--accent-color)' : '2px solid transparent'};"
-            >
-              OUTFIT AI
-            </button>
-            <button 
-              class="tab-btn" 
-              data-tab="categories"
-              style="flex: 1; padding: 18px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: ${state.tab === 'categories' ? '600' : '400'}; color: ${state.tab === 'categories' ? 'var(--accent-color)' : 'var(--text-tertiary)'}; border-bottom: ${state.tab === 'categories' ? '2px solid var(--accent-color)' : '2px solid transparent'};"
-            >
-              CATEGORIES
-            </button>
-            <button 
-              class="tab-btn" 
-              data-tab="settings"
-              style="flex: 1; padding: 18px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: ${state.tab === 'settings' ? '600' : '400'}; color: ${state.tab === 'settings' ? 'var(--accent-color)' : 'var(--text-tertiary)'}; border-bottom: ${state.tab === 'settings' ? '2px solid var(--accent-color)' : '2px solid transparent'};"
-            >
-              SETTINGS
-            </button>
-          </nav>
-
-          <div class="scrollable">
-            ${state.tab === 'wardrobe' ? renderWardrobe(currentItems, totalItems) : 
-              state.tab === 'outfit' ? renderOutfit(season, currentOutfits, totalItems) :
-              state.tab === 'categories' ? renderCategories() :
-              renderSettings()}
-          </div>
-
-          ${state.modal ? renderModal() : ''}
-        </div>
-      `;
-    }
-
-    function renderWardrobe(currentItems, totalItems) {
-      return `
-        <div style="padding: 24px; padding-bottom: 60px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-            <div style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300;">
-              Your Collection
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.15em;">
-                ${totalItems} ITEMS
-              </div>
-              <button class="add-item-btn" id="addItemBtn">
-                <span style="font-size: 14px;">+</span>
-                <span>ADD</span>
-              </button>
+        <div id="stockFields">
+          <div class="field">
+            <label>시장</label>
+            <div class="seg" id="marketSeg">
+              <button class="active" data-market="KR">국내(KR)</button>
+              <button data-market="US">미국(US)</button>
             </div>
           </div>
-
-          <div style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 24px; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
-            ${state.categories.map(cat => `
-              <button 
-                class="cat-btn" 
-                data-category="${cat.id}"
-                style="
-                  flex-shrink: 0;
-                  padding: 12px 20px;
-                  background: ${state.activeCategory === cat.id ? 'var(--bg-tertiary)' : 'var(--bg-secondary)'};
-                  border: 1px solid ${state.activeCategory === cat.id ? 'var(--accent-color)' : 'var(--border-color)'};
-                  border-radius: 2px;
-                  color: ${state.activeCategory === cat.id ? 'var(--accent-color)' : 'var(--text-tertiary)'};
-                  display: flex;
-                  align-items: center;
-                  gap: 8px;
-                "
-              >
-                <span style="font-size: 18px;">${cat.icon}</span>
-                <span style="font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.15em;">
-                  ${cat.label}
-                </span>
-                ${(state.wardrobe[cat.id] || []).length > 0 ? `
-                  <span style="
-                    font-family: 'Montserrat', sans-serif;
-                    font-size: 8px;
-                    background: ${state.activeCategory === cat.id ? 'var(--accent-color)' : 'var(--border-color)'};
-                    color: ${state.activeCategory === cat.id ? 'var(--bg-primary)' : 'var(--text-tertiary)'};
-                    padding: 2px 6px;
-                    border-radius: 10px;
-                    margin-left: 4px;
-                  ">
-                    ${(state.wardrobe[cat.id] || []).length}
-                  </span>
-                ` : ''}
-              </button>
-            `).join('')}
+          <div class="field">
+            <label>종목코드/티커</label>
+            <input id="inpSymbol" placeholder="예: 005930 (삼성전자) / AAPL">
+            <div class="hint">국내는 6자리 종목코드, 미국은 티커를 입력하세요.</div>
+            <div class="price-preview hidden" id="namePreview" style="margin-top:8px;">종목명: <b id="previewName">-</b></div>
           </div>
-
-          <main>
-            ${currentItems.length === 0 ? `
-              <div style="text-align: center; padding: 60px 0; color: var(--text-tertiary);">
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 20px; margin-bottom: 8px;">
-                  Empty Category
-                </div>
-                <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; margin-bottom: 16px;">
-                  ADD YOUR FIRST ${state.activeCategory} ITEM
-                </div>
-                <button class="add-item-btn" onclick="document.getElementById('addItemBtn').click()" style="margin: 0 auto;">
-                  <span style="font-size: 14px;">+</span>
-                  <span>ADD ITEM</span>
-                </button>
-              </div>
-            ` : `
-              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;">
-                ${currentItems.map(item => `
-                  <div class="item-card">
-                    <img 
-                      src="${item.src}" 
-                      alt="${item.name}" 
-                      style="width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--bg-tertiary);"
-                    />
-                    <button 
-                      class="delete-btn" 
-                      data-item-id="${item.id}"
-                      style="
-                        position: absolute;
-                        top: 8px;
-                        right: 8px;
-                        background: rgba(0,0,0,0.7);
-                        color: #fff;
-                        border: none;
-                        width: 26px;
-                        height: 26px;
-                        border-radius: 50%;
-                        cursor: pointer;
-                        font-size: 12px;
-                      "
-                    >×</button>
-                    <div style="padding: 8px; background: var(--bg-tertiary);">
-                      <div style="
-                        font-family: 'Montserrat', sans-serif;
-                        font-size: 9px;
-                        letter-spacing: 0.1em;
-                        color: var(--text-secondary);
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                      ">
-                        ${item.name}
-                      </div>
-                      ${(item.seasons?.length > 0 || item.color || item.brand) ? `
-                        <div class="item-meta">
-                          ${item.seasons?.map(s => {
-                            const season = SEASONS.find(se => se.id === s);
-                            return `<span class="meta-tag">${season.emoji}</span>`;
-                          }).join('') || ''}
-                          ${item.color ? `<span class="meta-tag">${item.color}</span>` : ''}
-                          ${item.brand ? `<span class="meta-tag">${item.brand}</span>` : ''}
-                        </div>
-                      ` : ''}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            `}
-          </main>
-        </div>
-      `;
-    }
-
-    function renderOutfit(season, currentOutfits, totalItems) {
-      return `
-        <div style="padding: 24px; padding-bottom: 60px;">
-          <div style="display: flex; gap: 12px; margin-bottom: 36px; flex-wrap: wrap;">
-            ${SEASONS.map(s => `
-              <button 
-                class="season-btn" 
-                data-season="${s.id}"
-                style="
-                  flex: 1;
-                  min-width: 140px;
-                  padding: 20px 16px;
-                  background: ${state.activeSeason === s.id ? 'var(--bg-tertiary)' : 'var(--bg-secondary)'};
-                  border: 1px solid ${state.activeSeason === s.id ? s.color : 'var(--border-color)'};
-                  border-radius: 4px;
-                  text-align: center;
-                  color: ${state.activeSeason === s.id ? s.color : 'var(--text-tertiary)'};
-                "
-              >
-                <div style="font-size: 24px; margin-bottom: 6px;">${s.emoji}</div>
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300;">
-                  ${s.label}
-                </div>
-                <div style="
-                  font-family: 'Montserrat', sans-serif;
-                  font-size: 9px;
-                  letter-spacing: 0.3em;
-                  margin-top: 2px;
-                ">
-                  ${s.en}
-                </div>
-              </button>
-            `).join('')}
+          <div class="field">
+            <label>섹터(선택)</label>
+            <input id="inpSector" placeholder="예: 반도체, IT, 금융...">
           </div>
-
-          <div style="text-align: center; margin-bottom: 40px;">
-            <button 
-              class="ai-btn" 
-              id="aiBtn"
-              ${state.loading || totalItems < 2 ? 'disabled' : ''}
-              style="
-                padding: 16px 48px;
-                background: ${state.loading ? 'var(--bg-secondary)' : 'linear-gradient(135deg, var(--accent-color), var(--accent-hover))'};
-                color: ${state.loading ? 'var(--text-tertiary)' : 'var(--bg-primary)'};
-                border-radius: 2px;
-                font-family: 'Montserrat', sans-serif;
-                font-size: 11px;
-                font-weight: 600;
-                letter-spacing: 0.15em;
-              "
-            >
-              ${state.loading ? `<span class="pulse">✦ AI 코디 생성 중...</span>` : `✦ ${season.label} 코디 AI 추천받기`}
-            </button>
-            <button 
-              class="add-item-btn" 
-              id="aiReferenceBtn"
-              style="margin: 12px auto 0; display: inline-flex;"
-            >
-              <span>📌</span>
-              <span>참고 자료 추가</span>
-            </button>
-            ${totalItems < 2 ? `
-              <div style="
-                font-family: 'Montserrat', sans-serif;
-                font-size: 10px;
-                color: var(--text-tertiary);
-                margin-top: 10px;
-                letter-spacing: 0.15em;
-              ">
-                CLOSET에 아이템을 2개 이상 추가해주세요
-              </div>
-            ` : ''}
-            ${(state.aiReference.images.length > 0 || state.aiReference.topColor || state.aiReference.bottomColor) ? `
-              <div style="margin-top: 16px; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
-                <div style="font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.2em; color: var(--accent-color); margin-bottom: 8px;">
-                  참고 자료 설정됨
-                </div>
-                ${state.aiReference.images.length > 0 ? `<div style="color: var(--text-secondary); font-size: 11px;">참고 이미지 ${state.aiReference.images.length}개</div>` : ''}
-                ${state.aiReference.topColor ? `<div style="color: var(--text-secondary); font-size: 11px;">상의 색상: ${state.aiReference.topColor}</div>` : ''}
-                ${state.aiReference.bottomColor ? `<div style="color: var(--text-secondary); font-size: 11px;">하의 색상: ${state.aiReference.bottomColor}</div>` : ''}
-              </div>
-            ` : ''}
+          <div class="field">
+            <label>매수일자</label>
+            <input id="inpDate" type="date">
           </div>
-
-          ${currentOutfits.length > 0 ? `
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
-              ${currentOutfits.map((outfit, i) => `
-                <div class="outfit-card" style="
-                  background: var(--bg-secondary);
-                  border: 1px solid ${season.color}22;
-                  border-radius: 4px;
-                  overflow: hidden;
-                ">
-                  <div style="
-                    padding: 6px 16px;
-                    background: ${season.color}15;
-                    border-bottom: 1px solid ${season.color}22;
-                  ">
-                    <span style="
-                      font-family: 'Montserrat', sans-serif;
-                      font-size: 9px;
-                      letter-spacing: 0.3em;
-                      color: ${season.color};
-                    ">
-                      LOOK ${String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <div style="padding: 24px;">
-                    <div style="
-                      display: flex;
-                      justify-content: space-between;
-                      align-items: flex-start;
-                      margin-bottom: 12px;
-                    ">
-                      <h3 style="
-                        font-family: 'Cormorant Garamond', serif;
-                        font-size: 22px;
-                        font-weight: 400;
-                      ">
-                        ${outfit.title}
-                      </h3>
-                      <span style="
-                        font-family: 'Montserrat', sans-serif;
-                        font-size: 9px;
-                        padding: 4px 10px;
-                        border: 1px solid ${season.color}44;
-                        color: ${season.color};
-                        border-radius: 2px;
-                        white-space: nowrap;
-                        margin-left: 8px;
-                      ">
-                        ${outfit.style}
-                      </span>
-                    </div>
-                    <p style="
-                      font-family: 'Georgia', serif;
-                      font-size: 13px;
-                      color: var(--text-secondary);
-                      line-height: 1.7;
-                      margin-bottom: 20px;
-                    ">
-                      ${outfit.description}
-                    </p>
-
-                    <div style="margin-bottom: 16px;">
-                      <div style="
-                        font-family: 'Montserrat', sans-serif;
-                        font-size: 9px;
-                        letter-spacing: 0.25em;
-                        color: var(--text-tertiary);
-                        margin-bottom: 10px;
-                      ">
-                        ITEMS
-                      </div>
-                      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                        ${outfit.items.map(item => {
-                          const [cat, ...nameParts] = item.split(':');
-                          const name = nameParts.join(':') || cat;
-                          const wardrobeItems = Object.values(state.wardrobe).flat();
-                          const found = wardrobeItems.find(wi => wi.name === name.trim() || wi.category === cat.trim());
-                          
-                          return `
-                            <div style="
-                              display: flex;
-                              align-items: center;
-                              gap: 6px;
-                              background: var(--bg-tertiary);
-                              border-radius: 2px;
-                              padding: 6px 10px;
-                              border: 1px solid var(--border-color);
-                            ">
-                              ${found ? `<img src="${found.src}" alt="" style="width: 28px; height: 28px; object-fit: cover; border-radius: 2px;" />` : ''}
-                              <div>
-                                <div style="
-                                  font-family: 'Montserrat', sans-serif;
-                                  font-size: 8px;
-                                  letter-spacing: 0.15em;
-                                  color: ${season.color};
-                                ">
-                                  ${cat.trim()}
-                                </div>
-                                <div style="
-                                  font-family: 'Montserrat', sans-serif;
-                                  font-size: 10px;
-                                  color: var(--text-primary);
-                                ">
-                                  ${name.trim()}
-                                </div>
-                              </div>
-                            </div>
-                          `;
-                        }).join('')}
-                      </div>
-                    </div>
-
-                    ${outfit.tip ? `
-                      <div style="
-                        padding: 12px;
-                        background: ${season.color}08;
-                        border-left: 2px solid ${season.color};
-                        border-radius: 0 2px 2px 0;
-                      ">
-                        <div style="
-                          font-family: 'Montserrat', sans-serif;
-                          font-size: 9px;
-                          letter-spacing: 0.2em;
-                          color: ${season.color};
-                          margin-bottom: 4px;
-                        ">
-                          STYLING TIP
-                        </div>
-                        <div style="
-                          font-family: 'Georgia', serif;
-                          font-size: 12px;
-                          color: var(--text-secondary);
-                          line-height: 1.6;
-                        ">
-                          ${outfit.tip}
-                        </div>
-                      </div>
-                    ` : ''}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          ` : !state.loading ? `
-            <div style="text-align: center; padding: 80px 0; color: var(--text-tertiary);">
-              <div style="font-size: 48px; margin-bottom: 16px;">${season.emoji}</div>
-              <div style="
-                font-family: 'Cormorant Garamond', serif;
-                font-size: 24px;
-                font-weight: 300;
-                margin-bottom: 8px;
-              ">
-                No Outfits Yet
-              </div>
-              <div style="
-                font-family: 'Montserrat', sans-serif;
-                font-size: 10px;
-                letter-spacing: 0.25em;
-              ">
-                위 버튼을 눌러 ${season.label} 코디를 추천받으세요
-              </div>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }
-
-    function renderCategories() {
-      return `
-        <div style="padding: 24px; padding-bottom: 60px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-            <div style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300;">
-              Categories
-            </div>
-            <button class="add-item-btn" id="addCategoryBtn">
-              <span style="font-size: 14px;">+</span>
-              <span>ADD</span>
-            </button>
+          <div class="price-preview hidden" id="pricePreview">조회된 시세: <b id="previewPrice">-</b></div>
+          <div class="field">
+            <label>수량</label>
+            <input id="inpQty" type="number" placeholder="예: 10">
           </div>
-
-          <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-secondary); margin-bottom: 24px;">
-            카테고리를 편집하면 옷장에 자동으로 반영됩니다
-          </div>
-
-          <div>
-            ${state.categories.map(cat => `
-              <div class="category-edit-item">
-                <div style="font-size: 32px; flex-shrink: 0;">${cat.icon}</div>
-                <div style="flex: 1;">
-                  <div style="font-family: 'Montserrat', sans-serif; font-size: 13px; letter-spacing: 0.1em; color: var(--text-primary); margin-bottom: 4px;">
-                    ${cat.label}
-                  </div>
-                  <div style="font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--text-tertiary);">
-                    ${(state.wardrobe[cat.id] || []).length} items
-                  </div>
-                </div>
-                <button class="edit-cat-btn" data-edit-cat="${cat.id}">✏️</button>
-                ${state.categories.length > 1 ? `<button class="delete-cat-btn" data-delete-cat="${cat.id}">🗑️</button>` : ''}
-              </div>
-            `).join('')}
+          <div class="field">
+            <label>매수가</label>
+            <input id="inpPrice" type="number" placeholder="자동 조회되며 직접 수정 가능">
           </div>
         </div>
-      `;
-    }
 
-    function renderSettings() {
-      return `
-        <div style="padding: 24px; padding-bottom: 60px;">
-          <div style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; margin-bottom: 24px;">
-            Settings
+        <div id="cashFields" class="hidden">
+          <div class="field">
+            <label>날짜</label>
+            <input id="inpCashDate" type="date">
           </div>
-
-          <div style="margin-bottom: 32px;">
-            <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 16px;">
-              THEME
-            </label>
-            <div class="theme-selector">
-              ${THEMES.map(theme => `
-                <button 
-                  class="theme-option ${state.settings.theme === theme.id ? 'selected' : ''}"
-                  data-theme="${theme.id}"
-                  style="color: var(--text-primary);"
-                >
-                  <div style="font-size: 32px; margin-bottom: 8px;">${theme.emoji}</div>
-                  <div style="font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 0.1em;">
-                    ${theme.label}
-                  </div>
-                </button>
-              `).join('')}
+          <div class="field">
+            <label>통화</label>
+            <div class="seg" id="cashCcySeg">
+              <button class="active" data-ccy="KRW">KRW</button>
+              <button data-ccy="USD">USD</button>
             </div>
           </div>
-
-          <div style="margin-bottom: 32px;">
-            <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); margin-bottom: 16px;">
-              ACCOUNT
-            </div>
-            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px;">
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: var(--text-primary); margin-bottom: 4px;">
-                ${state.user.email}
-              </div>
-              <div style="font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--text-tertiary); margin-bottom: 16px;">
-                Logged in
-              </div>
-              <button class="auth-btn" id="logoutBtnSettings" style="width: auto; padding: 10px 24px; margin: 0;">
-                LOGOUT
-              </button>
-            </div>
+          <div class="field">
+            <label>금액</label>
+            <input id="inpCashAmt" type="number" placeholder="예: 1000000">
           </div>
         </div>
-      `;
-    }
 
-    function renderModal() {
-      if (state.modal === 'editCategory' || state.modal === 'addCategory') {
-        const isEdit = state.modal === 'editCategory';
-        const category = isEdit ? state.categories.find(c => c.id === state.editingCategory) : null;
-        
-        return `
-          <div class="modal-overlay" id="modalOverlay">
-            <div class="modal-box" onclick="event.stopPropagation()">
-              <div style="margin-bottom: 24px;">
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 8px;">
-                  ${isEdit ? 'Edit Category' : 'New Category'}
-                </div>
-                <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-secondary);">
-                  ${isEdit ? 'MODIFY YOUR CATEGORY' : 'CREATE A NEW CATEGORY'}
-                </div>
-              </div>
-
-              <div style="margin-bottom: 24px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  CATEGORY NAME
-                </label>
-                <input 
-                  type="text" 
-                  id="categoryNameInput" 
-                  class="auth-input"
-                  value="${isEdit ? category.label : state.newCategoryName}"
-                  placeholder="e.g., SNEAKERS"
-                  style="margin-bottom: 0;"
-                />
-              </div>
-
-              <div style="margin-bottom: 24px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 12px;">
-                  SELECT ICON
-                </label>
-                <div class="icon-grid">
-                  ${ICON_OPTIONS.map(icon => `
-                    <button 
-                      class="icon-btn ${(isEdit ? category.icon : state.newCategoryIcon) === icon ? 'selected' : ''}" 
-                      data-icon="${icon}"
-                    >
-                      ${icon}
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-
-              <div style="display: flex; gap: 12px;">
-                <button 
-                  class="auth-btn secondary" 
-                  id="cancelModalBtn"
-                  style="flex: 1;"
-                >
-                  CANCEL
-                </button>
-                <button 
-                  class="auth-btn" 
-                  id="saveModalBtn"
-                  style="flex: 1;"
-                >
-                  ${isEdit ? 'SAVE' : 'CREATE'}
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      } else if (state.modal === 'addItem') {
-        return `
-          <div class="modal-overlay" id="modalOverlay">
-            <div class="modal-box" onclick="event.stopPropagation()">
-              <div style="margin-bottom: 24px;">
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 8px;">
-                  Add New Item
-                </div>
-                <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-secondary);">
-                  ADD TO ${state.activeCategory}
-                </div>
-              </div>
-
-              ${state.newItem.image ? `
-                <img src="${state.newItem.image}" class="preview-image" alt="Preview" />
-              ` : `
-                <div 
-                  class="upload-zone" 
-                  id="itemUploadZone"
-                  style="
-                    border: 2px dashed var(--border-color);
-                    border-radius: 4px;
-                    padding: 40px;
-                    text-align: center;
-                    background: var(--bg-primary);
-                    margin-bottom: 16px;
-                    cursor: pointer;
-                  "
-                >
-                  <div style="font-size: 28px; margin-bottom: 10px;">📷</div>
-                  <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.3em; color: var(--text-tertiary);">
-                    CLICK TO SELECT IMAGE
-                  </div>
-                  <input 
-                    type="file" 
-                    id="itemImageInput" 
-                    accept="image/*" 
-                    style="display: none;"
-                  />
-                </div>
-              `}
-
-              <div style="margin-bottom: 16px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  ITEM NAME
-                </label>
-                <input 
-                  type="text" 
-                  id="itemNameInput" 
-                  class="auth-input"
-                  value="${state.newItem.name}"
-                  placeholder="e.g., Black Leather Jacket"
-                  style="margin-bottom: 0;"
-                />
-              </div>
-
-              <div style="margin-bottom: 16px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  SEASONS (복수 선택 가능)
-                </label>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  ${SEASONS.map(s => `
-                    <button 
-                      class="season-tag ${state.newItem.seasons.includes(s.id) ? 'selected' : ''}"
-                      data-season="${s.id}"
-                    >
-                      ${s.emoji} ${s.label}
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-
-              <div style="margin-bottom: 16px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  COLOR
-                </label>
-                <input 
-                  type="text" 
-                  id="itemColorInput" 
-                  class="auth-input"
-                  value="${state.newItem.color}"
-                  placeholder="e.g., Black, Navy, Beige"
-                  style="margin-bottom: 0;"
-                />
-              </div>
-
-              <div style="margin-bottom: 24px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  BRAND
-                </label>
-                <input 
-                  type="text" 
-                  id="itemBrandInput" 
-                  class="auth-input"
-                  value="${state.newItem.brand}"
-                  placeholder="e.g., Nike, Zara, Uniqlo"
-                  style="margin-bottom: 0;"
-                />
-              </div>
-
-              <div style="display: flex; gap: 12px;">
-                <button 
-                  class="auth-btn secondary" 
-                  id="cancelModalBtn"
-                  style="flex: 1;"
-                >
-                  CANCEL
-                </button>
-                <button 
-                  class="auth-btn" 
-                  id="saveItemBtn"
-                  style="flex: 1;"
-                  ${!state.newItem.image || isSavingItem ? 'disabled' : ''}
-                >
-                  ${isSavingItem ? 'SAVING...' : 'ADD ITEM'}
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      } else if (state.modal === 'aiReference') {
-        return `
-          <div class="modal-overlay" id="modalOverlay">
-            <div class="modal-box" onclick="event.stopPropagation()">
-              <div style="margin-bottom: 24px;">
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 8px;">
-                  AI 참고 자료
-                </div>
-                <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-secondary);">
-                  코디 추천 시 참고할 이미지와 색상을 설정하세요
-                </div>
-              </div>
-
-              <div style="margin-bottom: 24px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 12px;">
-                  참고 코디 이미지
-                </label>
-                <div 
-                  class="upload-zone" 
-                  id="refUploadZone"
-                  style="
-                    border: 2px dashed var(--border-color);
-                    border-radius: 4px;
-                    padding: 30px;
-                    text-align: center;
-                    background: var(--bg-primary);
-                    margin-bottom: 12px;
-                    cursor: pointer;
-                  "
-                >
-                  <div style="font-size: 24px; margin-bottom: 8px;">📷</div>
-                  <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-tertiary);">
-                    CLICK TO ADD IMAGES
-                  </div>
-                  <input 
-                    type="file" 
-                    id="refImageInput" 
-                    accept="image/*" 
-                    multiple
-                    style="display: none;"
-                  />
-                </div>
-                ${state.aiReference.images.length > 0 ? `
-                  <div class="ref-image-grid">
-                    ${state.aiReference.images.map((img, idx) => `
-                      <div class="ref-image-item">
-                        <img src="${img}" alt="Reference ${idx + 1}" />
-                        <button class="ref-image-remove" data-ref-idx="${idx}">×</button>
-                      </div>
-                    `).join('')}
-                  </div>
-                ` : ''}
-              </div>
-
-              <div style="margin-bottom: 16px;">
-                <label style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-secondary); display: block; margin-bottom: 8px;">
-                  색상 조합
-                </label>
-                <div class="color-input-group">
-                  <div>
-                    <label style="font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--text-tertiary); display: block; margin-bottom: 4px;">
-                      상의 색상
-                    </label>
-                    <input 
-                      type="text" 
-                      id="refTopColorInput" 
-                      class="auth-input"
-                      value="${state.aiReference.topColor}"
-                      placeholder="e.g., Black, White"
-                      style="margin-bottom: 0;"
-                    />
-                  </div>
-                  <div>
-                    <label style="font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--text-tertiary); display: block; margin-bottom: 4px;">
-                      하의 색상
-                    </label>
-                    <input 
-                      type="text" 
-                      id="refBottomColorInput" 
-                      class="auth-input"
-                      value="${state.aiReference.bottomColor}"
-                      placeholder="e.g., Navy, Beige"
-                      style="margin-bottom: 0;"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div style="display: flex; gap: 12px;">
-                <button 
-                  class="auth-btn secondary" 
-                  id="cancelModalBtn"
-                  style="flex: 1;"
-                >
-                  CANCEL
-                </button>
-                <button 
-                  class="auth-btn" 
-                  id="saveRefBtn"
-                  style="flex: 1;"
-                >
-                  SAVE
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      return '';
-    }
-
-    function attachAuthListeners() {
-      const emailInput = document.getElementById('emailInput');
-      const passwordInput = document.getElementById('passwordInput');
-      const primaryBtn = document.getElementById('primaryAuthBtn');
-      const googleBtn = document.getElementById('googleAuthBtn');
-      const toggleBtn = document.getElementById('toggleAuthMode');
-
-      emailInput.addEventListener('input', e => {
-        state.email = e.target.value;
-      });
-
-      passwordInput.addEventListener('input', e => {
-        state.password = e.target.value;
-      });
-
-      passwordInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          primaryBtn.click();
-        }
-      });
-
-      primaryBtn.addEventListener('click', handleEmailAuth);
-      googleBtn.addEventListener('click', handleGoogleAuth);
-      toggleBtn.addEventListener('click', () => {
-        state.authMode = state.authMode === 'login' ? 'signup' : 'login';
-        state.error = '';
-        render();
-      });
-    }
-
-    async function handleEmailAuth() {
-      state.error = '';
-      try {
-        if (state.authMode === 'login') {
-          await signInWithEmailAndPassword(auth, state.email, state.password);
-        } else {
-          await createUserWithEmailAndPassword(auth, state.email, state.password);
-        }
-      } catch (error) {
-        state.error = getErrorMessage(error.code);
-        render();
-      }
-    }
-
-    async function handleGoogleAuth() {
-      state.error = '';
-      try {
-        await signInWithPopup(auth, googleProvider);
-      } catch (error) {
-        state.error = getErrorMessage(error.code);
-        render();
-      }
-    }
-
-    function getErrorMessage(code) {
-      const messages = {
-        'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
-        'auth/invalid-email': '유효하지 않은 이메일 형식입니다.',
-        'auth/operation-not-allowed': '이메일/비밀번호 로그인이 비활성화되어 있습니다.',
-        'auth/weak-password': '비밀번호는 6자 이상이어야 합니다.',
-        'auth/user-disabled': '비활성화된 계정입니다.',
-        'auth/user-not-found': '존재하지 않는 계정입니다.',
-        'auth/wrong-password': '비밀번호가 올바르지 않습니다.',
-        'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
-        'auth/popup-closed-by-user': '로그인 창이 닫혔습니다.',
-        'auth/cancelled-popup-request': '로그인이 취소되었습니다.'
-      };
-      return messages[code] || '오류가 발생했습니다. 다시 시도해주세요.';
-    }
-
-    function attachAppListeners() {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.tab = btn.dataset.tab;
-          render();
-        });
-      });
-
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.activeCategory = btn.dataset.category;
-          render();
-        });
-      });
-
-      document.querySelectorAll('.edit-cat-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const catId = btn.dataset.editCat;
-          const category = state.categories.find(c => c.id === catId);
-          state.editingCategory = catId;
-          state.newCategoryName = category.label;
-          state.newCategoryIcon = category.icon;
-          state.modal = 'editCategory';
-          render();
-        });
-      });
-
-      document.querySelectorAll('.delete-cat-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const catId = btn.dataset.deleteCat;
-          if (confirm('이 카테고리를 삭제하시겠습니까? 카테고리 내 모든 아이템도 삭제됩니다.')) {
-            state.categories = state.categories.filter(c => c.id !== catId);
-            delete state.wardrobe[catId];
-            if (state.activeCategory === catId) {
-              state.activeCategory = state.categories[0].id;
-            }
-            saveToFirestore();
-            render();
-          }
-        });
-      });
-
-      const addCategoryBtn = document.getElementById('addCategoryBtn');
-      if (addCategoryBtn) {
-        addCategoryBtn.addEventListener('click', () => {
-          state.newCategoryName = '';
-          state.newCategoryIcon = '👔';
-          state.modal = 'addCategory';
-          render();
-        });
-      }
-
-      const addItemBtn = document.getElementById('addItemBtn');
-      if (addItemBtn) {
-        addItemBtn.addEventListener('click', () => {
-          state.newItem = {
-            image: null,
-            name: '',
-            seasons: [],
-            color: '',
-            brand: ''
-          };
-          state.modal = 'addItem';
-          render();
-        });
-      }
-
-      const aiReferenceBtn = document.getElementById('aiReferenceBtn');
-      if (aiReferenceBtn) {
-        aiReferenceBtn.addEventListener('click', () => {
-          state.modal = 'aiReference';
-          render();
-        });
-      }
-
-      document.querySelectorAll('.season-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.activeSeason = btn.dataset.season;
-          render();
-        });
-      });
-
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const itemId = btn.dataset.itemId;
-          removeItem(itemId);
-        });
-      });
-
-      const aiBtn = document.getElementById('aiBtn');
-      if (aiBtn) {
-        aiBtn.addEventListener('click', getAIOutfit);
-      }
-
-      const logoutBtnSettings = document.getElementById('logoutBtnSettings');
-      if (logoutBtnSettings) {
-        logoutBtnSettings.addEventListener('click', handleLogout);
-      }
-
-      document.querySelectorAll('.theme-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const theme = btn.dataset.theme;
-          state.settings.theme = theme;
-          applyTheme(theme);
-          saveToFirestore();
-          render();
-        });
-      });
-
-      if (state.modal) {
-        attachModalListeners();
-      }
-    }
-
-    function attachModalListeners() {
-      const modalOverlay = document.getElementById('modalOverlay');
-      const cancelBtn = document.getElementById('cancelModalBtn');
-
-      if (modalOverlay) {
-        modalOverlay.addEventListener('click', () => {
-          state.modal = null;
-          render();
-        });
-      }
-
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          state.modal = null;
-          render();
-        });
-      }
-
-      if (state.modal === 'editCategory' || state.modal === 'addCategory') {
-        const saveBtn = document.getElementById('saveModalBtn');
-        const nameInput = document.getElementById('categoryNameInput');
-
-        if (saveBtn) {
-          saveBtn.addEventListener('click', saveCategory);
-        }
-
-        if (nameInput) {
-          nameInput.addEventListener('input', e => {
-            state.newCategoryName = e.target.value;
-          });
-
-          nameInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-              saveCategory();
-            }
-          });
-
-          setTimeout(() => nameInput.focus(), 100);
-        }
-
-        document.querySelectorAll('.icon-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            state.newCategoryIcon = btn.dataset.icon;
-            render();
-          });
-        });
-      } else if (state.modal === 'addItem') {
-        const uploadZone = document.getElementById('itemUploadZone');
-        const imageInput = document.getElementById('itemImageInput');
-        const nameInput = document.getElementById('itemNameInput');
-        const colorInput = document.getElementById('itemColorInput');
-        const brandInput = document.getElementById('itemBrandInput');
-        const saveItemBtn = document.getElementById('saveItemBtn');
-
-        if (uploadZone && imageInput) {
-          uploadZone.addEventListener('click', () => imageInput.click());
-          
-          imageInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-              const reader = new FileReader();
-              reader.onload = evt => {
-                state.newItem.image = evt.target.result;
-                render();
-              };
-              reader.readAsDataURL(file);
-            }
-          });
-        }
-
-        if (nameInput) {
-          nameInput.addEventListener('input', e => {
-            state.newItem.name = e.target.value;
-          });
-        }
-
-        if (colorInput) {
-          colorInput.addEventListener('input', e => {
-            state.newItem.color = e.target.value;
-          });
-        }
-
-        if (brandInput) {
-          brandInput.addEventListener('input', e => {
-            state.newItem.brand = e.target.value;
-          });
-        }
-
-        document.querySelectorAll('.season-tag').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const seasonId = btn.dataset.season;
-            if (state.newItem.seasons.includes(seasonId)) {
-              state.newItem.seasons = state.newItem.seasons.filter(s => s !== seasonId);
-            } else {
-              state.newItem.seasons.push(seasonId);
-            }
-            render();
-          });
-        });
-
-        if (saveItemBtn) {
-          saveItemBtn.addEventListener('click', saveItem);
-        }
-      } else if (state.modal === 'aiReference') {
-        const uploadZone = document.getElementById('refUploadZone');
-        const imageInput = document.getElementById('refImageInput');
-        const topColorInput = document.getElementById('refTopColorInput');
-        const bottomColorInput = document.getElementById('refBottomColorInput');
-        const saveRefBtn = document.getElementById('saveRefBtn');
-
-        if (uploadZone && imageInput) {
-          uploadZone.addEventListener('click', () => imageInput.click());
-          
-          imageInput.addEventListener('change', e => {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-              if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = evt => {
-                  state.aiReference.images.push(evt.target.result);
-                  render();
-                };
-                reader.readAsDataURL(file);
-              }
-            });
-            e.target.value = '';
-          });
-        }
-
-        if (topColorInput) {
-          topColorInput.addEventListener('input', e => {
-            state.aiReference.topColor = e.target.value;
-          });
-        }
-
-        if (bottomColorInput) {
-          bottomColorInput.addEventListener('input', e => {
-            state.aiReference.bottomColor = e.target.value;
-          });
-        }
-
-        document.querySelectorAll('.ref-image-remove').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.refIdx);
-            state.aiReference.images.splice(idx, 1);
-            render();
-          });
-        });
-
-        if (saveRefBtn) {
-          saveRefBtn.addEventListener('click', () => {
-            // AI 참고 자료는 localStorage에 저장 (Firestore 용량 절약)
-            try {
-              localStorage.setItem('aiReference', JSON.stringify(state.aiReference));
-            } catch (error) {
-              console.error('LocalStorage error:', error);
-            }
-            state.modal = null;
-            render();
-          });
-        }
-      }
-    }
-
-    function saveCategory() {
-      const name = state.newCategoryName.trim().toUpperCase();
-      
-      if (!name) {
-        alert('카테고리 이름을 입력해주세요.');
-        return;
-      }
-
-      if (state.modal === 'editCategory') {
-        const category = state.categories.find(c => c.id === state.editingCategory);
-        const oldId = category.id;
-        const newId = name;
-
-        category.id = newId;
-        category.label = name;
-        category.icon = state.newCategoryIcon;
-
-        if (oldId !== newId) {
-          state.wardrobe[newId] = state.wardrobe[oldId] || [];
-          delete state.wardrobe[oldId];
-          if (state.activeCategory === oldId) {
-            state.activeCategory = newId;
-          }
-          
-          if (state.wardrobe[newId]) {
-            state.wardrobe[newId].forEach(item => {
-              item.category = newId;
-            });
-          }
-        }
-      } else {
-        const exists = state.categories.find(c => c.id === name);
-        if (exists) {
-          alert('이미 존재하는 카테고리 이름입니다.');
-          return;
-        }
-
-        state.categories.push({
-          id: name,
-          label: name,
-          icon: state.newCategoryIcon
-        });
-        state.activeCategory = name;
-      }
-
-      state.modal = null;
-      saveToFirestore();
-      render();
-    }
-
-    async function saveItem() {
-      if (!state.newItem.image || isSavingItem) {
-        return;
-      }
-
-      // 저장 중 플래그 설정
-      isSavingItem = true;
-      render();
-
-      try {
-        const name = state.newItem.name.trim() || 'Untitled';
-        const itemId = Date.now() + Math.random();
-        
-        // 이미지를 Firebase Storage에 업로드
-        const imagePath = `wardrobe/${state.user.uid}/${itemId}.jpg`;
-        const imageUrl = await uploadImageToStorage(state.newItem.image, imagePath);
-
-        // 새 아이템 데이터 (이미지 URL만 저장)
-        const newItemData = {
-          id: itemId,
-          src: imageUrl,
-          name: name,
-          category: state.activeCategory,
-          seasons: [...state.newItem.seasons],
-          color: state.newItem.color.trim(),
-          brand: state.newItem.brand.trim()
-        };
-
-        // State 업데이트 (로컬 먼저)
-        if (!state.wardrobe[state.activeCategory]) {
-          state.wardrobe[state.activeCategory] = [];
-        }
-        
-        // 새 배열 생성하여 불변성 유지
-        const updatedWardrobe = {
-          ...state.wardrobe,
-          [state.activeCategory]: [...state.wardrobe[state.activeCategory], newItemData]
-        };
-
-        state.wardrobe = updatedWardrobe;
-
-        // 모달 닫고 newItem 초기화
-        state.modal = null;
-        state.newItem = {
-          image: null,
-          name: '',
-          seasons: [],
-          color: '',
-          brand: ''
-        };
-
-        // 즉시 렌더링하여 사용자에게 표시
-        isSavingItem = false;
-        render();
-
-        // 백그라운드에서 Firestore 저장
-        const userDoc = doc(db, 'users', state.user.uid);
-        await setDoc(userDoc, {
-          wardrobe: updatedWardrobe,
-          categories: state.categories,
-          outfits: state.outfits,
-          settings: state.settings,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-        
-        console.log('Item saved successfully');
-      } catch (error) {
-        console.error('Save error:', error);
-        alert(`저장 중 오류가 발생했습니다: ${error.message}`);
-        isSavingItem = false;
-        render();
-      }
-    }
-
-    async function removeItem(itemId) {
-      if (!state.wardrobe[state.activeCategory]) return;
-      
-      // 삭제할 아이템 찾기
-      const itemToDelete = state.wardrobe[state.activeCategory].find(item => item.id == itemId);
-      
-      // State에서 제거
-      state.wardrobe[state.activeCategory] = state.wardrobe[state.activeCategory].filter(
-        item => item.id != itemId
-      );
-      
-      render();
-      
-      // Storage에서 이미지 삭제
-      if (itemToDelete && itemToDelete.src) {
-        await deleteImageFromStorage(itemToDelete.src);
-      }
-      
-      // Firestore 업데이트
-      saveToFirestore();
-    }
-
-    async function getAIOutfit() {
-      const allItems = Object.entries(state.wardrobe).flatMap(([cat, items]) =>
-        items.map(item => ({ category: cat, name: item.name, id: item.id }))
-      );
-
-      if (allItems.length < 2) {
-        alert('옷장에 아이템을 2개 이상 추가해주세요!');
-        return;
-      }
-
-      state.loading = true;
-      render();
-
-      try {
-        const seasonInfo = SEASONS.find(s => s.id === state.activeSeason);
-        
-        let referenceText = '';
-        if (state.aiReference.images.length > 0 || state.aiReference.topColor || state.aiReference.bottomColor) {
-          referenceText = '\n\n참고 자료:';
-          if (state.aiReference.images.length > 0) {
-            referenceText += `\n- ${state.aiReference.images.length}개의 참고 코디 이미지가 제공되었습니다. 이 이미지들의 스타일과 조합을 참고하세요.`;
-          }
-          if (state.aiReference.topColor && state.aiReference.bottomColor) {
-            referenceText += `\n- 선호 색상 조합: 상의 ${state.aiReference.topColor}, 하의 ${state.aiReference.bottomColor}`;
-          } else if (state.aiReference.topColor) {
-            referenceText += `\n- 상의 색상: ${state.aiReference.topColor}`;
-          } else if (state.aiReference.bottomColor) {
-            referenceText += `\n- 하의 색상: ${state.aiReference.bottomColor}`;
-          }
-        }
-
-        const prompt = `당신은 한국의 패션 스타일리스트입니다. 아래 옷장 아이템 목록을 보고 ${seasonInfo.label} 시즌에 어울리는 코디를 추천해주세요.${referenceText}
-
-옷장 아이템:
-${allItems.map(i => `- [${i.category}] ${i.name}`).join('\n')}
-
-다음 JSON 형식으로만 응답하세요 (마크다운 없이):
-{
-  "outfits": [
-    {
-      "title": "코디 이름 (예: 캐주얼 데일리룩)",
-      "style": "스타일 키워드 (예: 캐주얼, 미니멀, 스트리트)",
-      "items": ["카테고리:아이템명", ...],
-      "description": "이 코디에 대한 간단한 설명 (2-3문장)",
-      "tip": "스타일링 팁 한 가지"
-    }
-  ]
+        <button class="btn-primary" id="btnSave">저장</button>
+        <div id="inputMsg" class="hint"></div>
+      </div>
+
+      <div class="card">
+        <h3>최근 입력 내역</h3>
+        <div id="txList"><div class="empty">내역이 없습니다.</div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <h2 class="page-title">설정</h2>
+      <div class="card">
+        <div class="set-row">
+          <div><div style="font-weight:700;">다크 모드</div><div class="muted" style="font-size:12px;">화면 테마를 변경합니다</div></div>
+          <div class="switch on" id="themeSwitch"><i></i></div>
+        </div>
+        <div class="set-row">
+          <div><div style="font-weight:700;">환율 기준</div><div class="muted" style="font-size:12px;">USD/KRW (open.er-api.com)</div></div>
+          <div id="fxRate2" style="font-weight:700;">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>데이터</h3>
+        <button class="btn-ghost" id="btnRefresh">전체 시세 새로고침</button>
+        <button class="btn-ghost" id="btnClear" style="color:var(--down);">모든 데이터 삭제</button>
+      </div>
+      <div class="card">
+        <h3>정보</h3>
+        <div class="muted" style="font-size:13px;line-height:1.7;">
+          Asset Compass v1.0<br>해외주식: Finnhub API · 국내주식: Naver 시세(무료, CORS 프록시 경유)<br>
+          데이터는 Firebase Firestore에 저장됩니다.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-tab="dashboard" class="active"><span class="ic">◔</span>대시보드</button>
+    <button data-tab="assets"><span class="ic">▤</span>자산</button>
+    <button data-tab="trend"><span class="ic">⤴</span>추이</button>
+    <button data-tab="input"><span class="ic">＋</span>입력</button>
+    <button data-tab="settings"><span class="ic">⚙</span>설정</button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   Firebase init
+============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBFLf7y9X0IEzcCNQy64BCbcRNlpKRQKOk",
+  authDomain: "stock-e00d2.firebaseapp.com",
+  projectId: "stock-e00d2",
+  storageBucket: "stock-e00d2.firebasestorage.app",
+  messagingSenderId: "636302730306",
+  appId: "1:636302730306:web:d38eff0d342fcb3da939db",
+  measurementId: "G-VTP4V77XW5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const TX_COL = db.collection("transactions");
+
+/* ============================================================
+   Constants / API helpers
+============================================================ */
+const FINNHUB_KEY = "d6vriu1r01qiiutct6j0d6vriu1r01qiiutct6jg";
+// 무료 CORS 프록시 (국내 주식 - 네이버 금융 비공식 API 호출용)
+// corsproxy.io 가 막힐 경우 allorigins로 자동 폴백합니다.
+function corsWrap(url){ return "https://corsproxy.io/?url=" + encodeURIComponent(url); }
+function corsWrapAlt(url){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url); }
+
+async function fetchJsonWithFallback(url){
+  try{
+    const r = await fetch(corsWrap(url));
+    if(!r.ok) throw new Error("proxy1 fail");
+    return await r.json();
+  }catch(e){
+    const r2 = await fetch(corsWrapAlt(url));
+    return await r2.json();
+  }
 }
 
-${seasonInfo.label} 시즌의 날씨와 분위기에 맞게 최대 3가지 코디를 추천해주세요. 반드시 위 옷장에 있는 아이템만 사용하세요.${referenceText ? ' 제공된 참고 자료의 스타일과 색상 조합을 최대한 반영해주세요.' : ''}`;
+function isKR(symbol){ return /^\d{5,6}$/.test(symbol); }
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            messages: [{ role: 'user', content: prompt }]
-          })
-        });
+// Yahoo Finance 차트 API (무료, 키 불필요) - 해외 티커뿐 아니라 .KS(코스피)/.KQ(코스닥) 접미사로 국내 종목/ETF도 조회 가능
+async function fetchYahooChart(ySymbol, range, interval){
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ySymbol}?range=${range}&interval=${interval}`;
+  let json;
+  try{
+    const r = await fetch(corsWrap(url));
+    if(!r.ok) throw new Error("proxy1 http error");
+    json = await r.json();
+  }catch(e){
+    const r2 = await fetch(corsWrapAlt(url));
+    json = await r2.json();
+  }
+  const result = json && json.chart && json.chart.result && json.chart.result[0];
+  if(!result || !result.timestamp) return [];
+  const ts = result.timestamp;
+  const closes = (result.indicators && result.indicators.quote && result.indicators.quote[0] && result.indicators.quote[0].close) || [];
+  return ts.map((t,i)=>({ t: new Date(t*1000).toISOString().slice(0,10), c: closes[i] }))
+           .filter(r => r.c !== null && r.c !== undefined && !isNaN(r.c));
+}
 
-        const data = await res.json();
-        const text = data.content.map(c => c.text || '').join('');
-        const clean = text.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(clean);
+// 국내 종목코드는 거래소를 모르기 때문에 코스피(.KS)를 먼저 시도하고, 비어있으면 코스닥(.KQ)으로 재시도
+async function fetchKRChart(symbol, range, interval){
+  let rows = await fetchYahooChart(symbol + ".KS", range, interval);
+  if(rows.length === 0) rows = await fetchYahooChart(symbol + ".KQ", range, interval);
+  return rows;
+}
 
-        state.outfits[state.activeSeason] = parsed.outfits;
-        saveToFirestore();
-      } catch (err) {
-        console.error(err);
-        alert('AI 추천 중 오류가 발생했습니다. 다시 시도해주세요.');
-      } finally {
-        state.loading = false;
-        render();
-      }
+// 필요한 기간(일)을 Yahoo의 range 파라미터로 변환 (여유를 두고 더 넉넉한 구간을 요청)
+function rangeForDays(days){
+  if(days <= 25) return "1mo";
+  if(days <= 80) return "3mo";
+  if(days <= 170) return "6mo";
+  if(days <= 360) return "1y";
+  if(days <= 720) return "2y";
+  if(days <= 1800) return "5y";
+  return "10y";
+}
+
+// 현재가 조회
+async function getQuote(symbol, market){
+  if(market === "KR" || isKR(symbol)){
+    const rows = await fetchKRChart(symbol, "1mo", "1d");
+    if(rows.length === 0) throw new Error("국내 시세를 찾을 수 없습니다 (종목코드를 확인해주세요)");
+    const last = rows[rows.length-1];
+    const prev = rows.length > 1 ? rows[rows.length-2] : last;
+    return { price: last.c, prevClose: prev.c, currency: "KRW", name: symbol };
+  } else {
+    const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_KEY}`);
+    const d = await r.json();
+    if(!d || !d.c) throw new Error("해외 시세를 찾을 수 없습니다");
+    return { price: d.c, prevClose: d.pc, currency: "USD", name: symbol };
+  }
+}
+
+// 특정 날짜 종가(매수일자 시세) 조회
+async function getPriceOnDate(symbol, market, dateStr){
+  if(market === "KR" || isKR(symbol)){
+    const target = new Date(dateStr);
+    const diffDays = Math.ceil((Date.now() - target.getTime()) / 86400000) + 15;
+    const range = rangeForDays(Math.max(diffDays, 30));
+    const rows = await fetchKRChart(symbol, range, "1d");
+    if(rows.length === 0) throw new Error("국내 시세를 찾을 수 없습니다 (종목코드를 확인해주세요)");
+    const exact = rows.find(r => r.t === dateStr);
+    if(exact) return exact.c;
+    const before = rows.filter(r => r.t <= dateStr);
+    return before.length ? before[before.length-1].c : rows[rows.length-1].c; // 영업일이 아니면 가장 가까운 이전 거래일 종가 사용
+  } else {
+    const ts = Math.floor(new Date(dateStr).getTime()/1000);
+    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${ts-86400*6}&to=${ts+86400}&token=${FINNHUB_KEY}`);
+    const d = await r.json();
+    if(d.s === "ok" && d.c && d.c.length) return d.c[d.c.length-1];
+    const q = await getQuote(symbol, "US");
+    return q.price;
+  }
+}
+
+// 과거 일봉 (차트용)
+async function getCandles(symbol, market, days){
+  if(market === "KR" || isKR(symbol)){
+    const range = rangeForDays(days + 5);
+    const rows = await fetchKRChart(symbol, range, "1d");
+    const cutoff = daysAgo(days);
+    return rows.filter(r => new Date(r.t) >= cutoff);
+  } else {
+    const to = Math.floor(Date.now()/1000);
+    const from = to - days*86400;
+    const r = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_KEY}`);
+    const d = await r.json();
+    if(d.s !== "ok") return [];
+    return d.t.map((t,i)=>({ t: new Date(t*1000).toISOString().slice(0,10), c: d.c[i] }));
+  }
+}
+function fmtNaverDate(d){ return d.toISOString().slice(0,10).replace(/-/g,''); }
+function daysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d; }
+
+// 환율
+let fxRate = 1350;
+async function loadFx(){
+  try{
+    const r = await fetch("https://open.er-api.com/v6/latest/USD");
+    const d = await r.json();
+    fxRate = d.rates.KRW;
+  }catch(e){}
+  document.getElementById("fxRate").textContent = fxRate.toFixed(1);
+  document.getElementById("fxRate2").textContent = fxRate.toFixed(1) + " 원";
+}
+
+function fmtMoney(v, ccy){
+  if(ccy === "USD") return "$" + Number(v).toLocaleString(undefined,{maximumFractionDigits:2});
+  return "₩" + Math.round(v).toLocaleString();
+}
+function toKRW(v, ccy){ return ccy === "USD" ? v*fxRate : v; }
+
+/* ============================================================
+   State
+============================================================ */
+let transactions = []; // from firestore
+let quoteCache = {}; // symbol -> {price, prevClose, currency}
+let currentPieMode = "type";
+let currentSort = "value-desc";
+let currentTrendPeriod = "1m";
+let activeStock = null;
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+/* ============================================================
+   Tab navigation
+============================================================ */
+function goTab(name){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+name).classList.add("active");
+  document.querySelectorAll("nav.tabbar button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+}
+document.querySelectorAll("nav.tabbar button").forEach(b=>{
+  b.addEventListener("click", ()=>goTab(b.dataset.tab));
+});
+
+/* ============================================================
+   Firestore load / save
+============================================================ */
+/* ============================================================
+   Firestore load / save (+ 로컬 백업: Firestore 권한 오류 시에도
+   데이터가 화면에 반영되도록 localStorage에 임시 보관합니다)
+============================================================ */
+function getLocalPending(){
+  try{ return JSON.parse(localStorage.getItem("pendingTx") || "[]"); }catch(e){ return []; }
+}
+function setLocalPending(arr){ localStorage.setItem("pendingTx", JSON.stringify(arr)); }
+
+async function loadTransactions(){
+  let firestoreDocs = [];
+  try{
+    const snap = await TX_COL.orderBy("date","asc").get();
+    firestoreDocs = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(e){
+    console.error("Firestore 읽기 실패:", e);
+    toast("⚠ 서버 데이터를 불러오지 못했습니다 (" + (e.code||e.message) + ")");
+  }
+  const pending = getLocalPending();
+  transactions = [...firestoreDocs, ...pending].sort((a,b)=> (a.date>b.date?1:-1));
+}
+
+// Firestore에 쓰기를 시도하고, 권한 오류 등으로 실패하면 로컬에 임시 저장합니다.
+async function saveTransaction(tx){
+  try{
+    await TX_COL.add(tx);
+    return { ok:true, mode:"server" };
+  }catch(e){
+    console.error("Firestore 쓰기 실패:", e);
+    const pending = getLocalPending();
+    pending.push({ ...tx, id: "local_" + Date.now() + "_" + Math.random().toString(36).slice(2) });
+    setLocalPending(pending);
+    return { ok:true, mode:"local", error: e };
+  }
+}
+
+async function saveSnapshotIfNeeded(holdings){
+  const today = new Date().toISOString().slice(0,10);
+  const totalAsset = holdings.reduce((s,h)=>s+h.valueKRW,0) + getCashTotalKRW();
+  const totalCost = holdings.reduce((s,h)=>s+h.costKRW,0) + getCashTotalKRW();
+  const id = today;
+  await db.collection("snapshots").doc(id).set({ date: today, asset: totalAsset, cost: totalCost }, {merge:true});
+}
+
+/* ============================================================
+   Build holdings from transactions
+============================================================ */
+function getCashTx(){ return transactions.filter(t=>t.assetType==="cash"); }
+function getStockTx(){ return transactions.filter(t=>t.assetType!=="cash"); }
+function getCashTotalKRW(){
+  return getCashTx().reduce((s,t)=> s + toKRW(Number(t.amount), t.currency), 0);
+}
+
+function buildHoldings(){
+  const map = {};
+  getStockTx().forEach(t=>{
+    const key = t.market+":"+t.symbol;
+    if(!map[key]) map[key] = { symbol:t.symbol, name: t.name||t.symbol, market:t.market, sector:t.sector||"미분류", qty:0, cost:0, currency: t.market==="US"?"USD":"KRW" };
+    map[key].qty += Number(t.quantity);
+    map[key].cost += Number(t.quantity)*Number(t.price);
+    if(t.sector) map[key].sector = t.sector;
+    if(t.name) map[key].name = t.name;
+  });
+  return Object.values(map).filter(h=>h.qty>0);
+}
+
+async function refreshQuotes(holdings){
+  await Promise.all(holdings.map(async h=>{
+    const key = h.market+":"+h.symbol;
+    try{
+      const q = await getQuote(h.symbol, h.market);
+      quoteCache[key] = q;
+    }catch(e){ quoteCache[key] = quoteCache[key] || { price: h.cost/h.qty, prevClose: h.cost/h.qty, currency: h.currency }; }
+  }));
+  holdings.forEach(h=>{
+    const key = h.market+":"+h.symbol;
+    let q = quoteCache[key] || { price: h.cost/h.qty, prevClose: h.cost/h.qty };
+    if(q.price === undefined || q.price === null || isNaN(q.price) || q.price<=0){
+      q = { price: h.cost/h.qty, prevClose: h.cost/h.qty };
     }
+    h.price = q.price; h.prevClose = (q.prevClose===undefined||isNaN(q.prevClose)) ? q.price : q.prevClose;
+    h.value = h.price * h.qty;
+    h.valueKRW = toKRW(h.value, h.currency);
+    h.costKRW = toKRW(h.cost, h.currency);
+    h.profitKRW = h.valueKRW - h.costKRW;
+    h.rate = h.costKRW ? (h.profitKRW/h.costKRW*100) : 0;
+    h.dailyProfitKRW = toKRW((h.price - h.prevClose)*h.qty, h.currency);
+  });
+  return holdings;
+}
 
-    async function handleLogout() {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
+/* ============================================================
+   DASHBOARD - pie charts
+============================================================ */
+let pieChart;
+const PALETTE = ["#3ee08a","#5b8cff","#e0b03e","#ff5d6c","#a16ee0","#37c5d8","#f08a4b","#8bd450","#d85ba1","#6c7bd1"];
+
+async function renderDashboard(holdings){
+  let labels=[], data=[], colors=[];
+  if(currentPieMode === "type"){
+    const stockTotal = holdings.reduce((s,h)=>s+h.valueKRW,0);
+    const cashTotal = getCashTotalKRW();
+    labels=["주식","현금"]; data=[stockTotal,cashTotal]; colors=["#3ee08a","#5b8cff"];
+  } else if(currentPieMode === "sector"){
+    const map={};
+    holdings.forEach(h=>{ map[h.sector]=(map[h.sector]||0)+h.valueKRW; });
+    labels=Object.keys(map); data=Object.values(map); colors=labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+  } else {
+    labels = holdings.map(h=>h.symbol);
+    data = holdings.map(h=>h.valueKRW);
+    colors = labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+  }
+  const total = data.reduce((a,b)=>a+b,0) || 1;
+
+  const ctx = document.getElementById("pieChart").getContext("2d");
+  if(pieChart) pieChart.destroy();
+  if(data.length===0 || total===0){
+    document.getElementById("pieLegend").innerHTML = '<div class="empty">표시할 데이터가 없습니다.</div>';
+    return;
+  }
+  pieChart = new Chart(ctx, {
+    type: "doughnut",
+    data: { labels, datasets:[{ data, backgroundColor: colors, borderWidth:0 }] },
+    options: {
+      cutout: "62%",
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
+        label:(c)=> c.label + ": " + (c.parsed/total*100).toFixed(1) + "% (" + fmtMoney(c.parsed,"KRW") + ")"
+      } } }
     }
+  });
+  document.getElementById("pieLegend").innerHTML = labels.map((l,i)=>{
+    const pct = (data[i]/total*100).toFixed(1);
+    return `<div class="li"><span class="lbl"><span class="dot" style="background:${colors[i]}"></span>${l}</span><span><b>${pct}%</b> · ${fmtMoney(data[i],"KRW")}</span></div>`;
+  }).join("");
+}
+document.querySelectorAll(".pie-tabs button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll(".pie-tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); currentPieMode = b.dataset.pie;
+    renderDashboard(window.__holdings || []);
+  });
+});
 
-    async function saveToFirestore() {
-      if (!state.user || state.syncing) return;
-      
-      try {
-        state.syncing = true;
-        const userDoc = doc(db, 'users', state.user.uid);
-        // AI 참고 이미지는 제외 (용량 절약)
-        await setDoc(userDoc, {
-          categories: state.categories,
-          wardrobe: state.wardrobe,
-          outfits: state.outfits,
-          settings: state.settings,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-      } catch (error) {
-        console.error('Save error:', error);
-      } finally {
-        state.syncing = false;
-      }
+/* ============================================================
+   ASSETS tab
+============================================================ */
+function renderAssets(holdings){
+  const totalAssetKRW = holdings.reduce((s,h)=>s+h.valueKRW,0) + getCashTotalKRW();
+  const totalCostKRW = holdings.reduce((s,h)=>s+h.costKRW,0) + getCashTotalKRW();
+  const totalProfitKRW = totalAssetKRW - totalCostKRW;
+  const dailyProfitKRW = holdings.reduce((s,h)=>s+h.dailyProfitKRW,0);
+
+  document.getElementById("totalAssets").textContent = fmtMoney(totalAssetKRW,"KRW");
+  document.getElementById("totalProfit").textContent = fmtMoney(totalProfitKRW,"KRW");
+  setTag("totalProfitPct", totalProfitKRW, totalCostKRW? totalProfitKRW/totalCostKRW*100 : 0);
+  document.getElementById("dailyProfit").textContent = fmtMoney(dailyProfitKRW,"KRW");
+  setTag("dailyProfitPct", dailyProfitKRW, totalAssetKRW? dailyProfitKRW/totalAssetKRW*100:0);
+
+  let sorted = [...holdings];
+  const [field,dir] = currentSort.split("-");
+  sorted.sort((a,b)=>{
+    const av = field==="value"?a.valueKRW:field==="profit"?a.profitKRW:a.rate;
+    const bv = field==="value"?b.valueKRW:field==="profit"?b.profitKRW:b.rate;
+    return dir==="desc" ? bv-av : av-bv;
+  });
+
+  const list = document.getElementById("holdingsList");
+  if(sorted.length===0){ list.innerHTML = '<div class="empty">보유 종목이 없습니다. 입력 탭에서 추가해보세요.</div>'; return; }
+  list.innerHTML = sorted.map(h=>{
+    const up = h.profitKRW>=0;
+    return `<div class="holding" data-symbol="${h.symbol}" data-market="${h.market}">
+      <div><div class="name">${h.name||h.symbol} <span class="muted" style="font-size:11px;">${h.symbol}</span></div><div class="sub">${h.sector} · ${h.qty}주</div></div>
+      <div class="right">
+        <div class="val">${fmtMoney(h.valueKRW,"KRW")}</div>
+        <div class="pct" style="color:${up?'var(--up)':'var(--down)'}">${up?'+':''}${fmtMoney(h.profitKRW,"KRW")} (${h.rate.toFixed(2)}%)</div>
+      </div>
+    </div>`;
+  }).join("");
+  list.querySelectorAll(".holding").forEach(el=>{
+    el.addEventListener("click", ()=> openStock(el.dataset.symbol, el.dataset.market));
+  });
+}
+function setTag(id, value, pct){
+  const el = document.getElementById(id);
+  const up = value>=0;
+  el.textContent = (up?"+":"") + pct.toFixed(2) + "%";
+  el.className = "tag " + (up?"up":"down");
+}
+document.querySelectorAll("#sortRow button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#sortRow button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); currentSort = b.dataset.sort;
+    renderAssets(window.__holdings || []);
+  });
+});
+
+/* ============================================================
+   TREND tab
+============================================================ */
+let trendChart;
+async function renderTrend(){
+  const snap = await db.collection("snapshots").orderBy("date","asc").get();
+  let rows = snap.docs.map(d=>d.data());
+  const periodDays = {"1m":30,"3m":90,"6m":182,"1y":365,"3y":1095,"5y":1825}[currentTrendPeriod];
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-periodDays);
+  rows = rows.filter(r=> new Date(r.date) >= cutoff);
+  if(rows.length===0){
+    document.getElementById("trendAssetNow").textContent="-";
+    document.getElementById("trendCostNow").textContent="-";
+  } else {
+    document.getElementById("trendAssetNow").textContent = fmtMoney(rows[rows.length-1].asset,"KRW");
+    document.getElementById("trendCostNow").textContent = fmtMoney(rows[rows.length-1].cost,"KRW");
+  }
+  const ctx = document.getElementById("trendChart").getContext("2d");
+  if(trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx, {
+    type:"line",
+    data:{
+      labels: rows.map(r=>r.date),
+      datasets:[
+        { label:"자산", data: rows.map(r=>r.asset), borderColor:"#5b8cff", backgroundColor:"rgba(91,140,255,.12)", fill:true, tension:.3, pointRadius:0 },
+        { label:"원금", data: rows.map(r=>r.cost), borderColor:"#e0b03e", backgroundColor:"rgba(224,176,62,.06)", fill:true, tension:.3, pointRadius:0 }
+      ]
+    },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{display:rows.length>0, ticks:{maxTicksLimit:6}}, y:{display:rows.length>0} } }
+  });
+}
+document.querySelectorAll("#periodRow button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#periodRow button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); currentTrendPeriod = b.dataset.p; renderTrend();
+  });
+});
+
+/* ============================================================
+   STOCK detail tab
+============================================================ */
+let stockChart;
+let stockPeriod = "1m";
+async function openStock(symbol, market){
+  activeStock = {symbol, market};
+  document.getElementById("stockTitle").textContent = symbol;
+  document.getElementById("stockSub").textContent = market==="KR" ? "국내(KR)" : "미국(US)";
+  goTab("stock"); // will be overridden below to show page-stock specifically
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-stock").classList.add("active");
+
+  const h = (window.__holdings||[]).find(x=>x.symbol===symbol && x.market===market);
+  if(h){
+    document.getElementById("stockPrice").textContent = fmtMoney(h.price, h.currency);
+    const chg = h.prevClose? (h.price-h.prevClose)/h.prevClose*100 : 0;
+    const tag = document.getElementById("stockChg");
+    tag.textContent = (chg>=0?"+":"")+chg.toFixed(2)+"%";
+    tag.className = "tag " + (chg>=0?"up":"down");
+    document.getElementById("stockHoldingCard").innerHTML = `
+      <h3>보유 정보</h3>
+      <div class="row" style="margin-bottom:8px;"><span class="muted">보유수량</span><span>${h.qty}주</span></div>
+      <div class="row" style="margin-bottom:8px;"><span class="muted">평가금액</span><span>${fmtMoney(h.valueKRW,"KRW")}</span></div>
+      <div class="row" style="margin-bottom:8px;"><span class="muted">매입금액</span><span>${fmtMoney(h.costKRW,"KRW")}</span></div>
+      <div class="row"><span class="muted">총수익률</span><span style="color:${h.rate>=0?'var(--up)':'var(--down)'}">${h.rate.toFixed(2)}%</span></div>`;
+  }
+  await loadStockChart();
+}
+async function loadStockChart(){
+  if(!activeStock) return;
+  const days = {"1m":30,"3m":90,"6m":182,"1y":365}[stockPeriod];
+  const candles = await getCandles(activeStock.symbol, activeStock.market, days);
+  const ctx = document.getElementById("stockChart").getContext("2d");
+  if(stockChart) stockChart.destroy();
+  stockChart = new Chart(ctx, {
+    type:"line",
+    data:{ labels: candles.map(c=>c.t), datasets:[{ data: candles.map(c=>c.c), borderColor:"#3ee08a",
+      backgroundColor:"rgba(62,224,138,.1)", fill:true, tension:.25, pointRadius:0 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{ ticks:{maxTicksLimit:5} } } }
+  });
+}
+document.querySelectorAll("#stockPeriodRow button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#stockPeriodRow button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); stockPeriod = b.dataset.sp; loadStockChart();
+  });
+});
+
+/* ============================================================
+   INPUT tab
+============================================================ */
+let curAssetType = "stock", curMarket = "KR", curCcy = "KRW";
+document.querySelectorAll("#assetTypeSeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#assetTypeSeg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); curAssetType = b.dataset.type;
+    document.getElementById("stockFields").classList.toggle("hidden", curAssetType!=="stock");
+    document.getElementById("cashFields").classList.toggle("hidden", curAssetType!=="cash");
+  });
+});
+document.querySelectorAll("#marketSeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#marketSeg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); curMarket = b.dataset.market;
+  });
+});
+document.querySelectorAll("#cashCcySeg button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("#cashCcySeg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); curCcy = b.dataset.ccy;
+  });
+});
+
+// 종목명 조회 (국내: 네이버 자동완성 / 해외: Finnhub 심볼 검색)
+async function getStockName(symbol, market){
+  if(market === "KR" || isKR(symbol)){
+    const url = `https://ac.stock.naver.com/ac?q=${symbol}&target=stock,index,marketSum`;
+    try{
+      const r = await fetch(corsWrap(url));
+      const d = await r.json();
+      const item = d?.items?.[0]?.[0]?.find?.(x=>x.code===symbol) || d?.items?.[0]?.find?.(x=>x.code===symbol);
+      if(item && item.name) return item.name;
+      // 구조가 다를 경우 첫 항목 사용
+      const flat = (d?.items || []).flat();
+      const found = flat.find(x=>x && x.code === symbol);
+      if(found) return found.name;
+    }catch(e){
+      try{
+        const r2 = await fetch(corsWrapAlt(url));
+        const d2 = await r2.json();
+        const flat = (d2?.items || []).flat();
+        const found = flat.find(x=>x && x.code === symbol);
+        if(found) return found.name;
+      }catch(e2){}
     }
+    return null;
+  } else {
+    try{
+      const r = await fetch(`https://finnhub.io/api/v1/search?q=${symbol}&token=${FINNHUB_KEY}`);
+      const d = await r.json();
+      const exact = d?.result?.find(x=>x.symbol === symbol);
+      return exact ? exact.description : (d?.result?.[0]?.description || null);
+    }catch(e){ return null; }
+  }
+}
 
-    function setupFirestoreSync(userId) {
-      if (unsubscribeFirestore) {
-        unsubscribeFirestore();
-      }
+let priceLookupTimer;
+function scheduleLookup(){
+  clearTimeout(priceLookupTimer);
+  priceLookupTimer = setTimeout(lookupPrice, 500);
+}
+document.getElementById("inpSymbol").addEventListener("input", scheduleLookup);
+document.getElementById("inpDate").addEventListener("change", scheduleLookup);
 
-      const userDoc = doc(db, 'users', userId);
-      
-      // 실시간 동기화 설정
-      unsubscribeFirestore = onSnapshot(userDoc, snapshot => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          
-          // 로컬 state와 비교하여 필요한 경우만 업데이트
-          const hasChanges = 
-            JSON.stringify(data.wardrobe) !== JSON.stringify(state.wardrobe) ||
-            JSON.stringify(data.categories) !== JSON.stringify(state.categories) ||
-            JSON.stringify(data.outfits) !== JSON.stringify(state.outfits);
-
-          if (hasChanges) {
-            console.log('Syncing from Firestore');
-            state.categories = data.categories || [...DEFAULT_CATEGORIES];
-            state.wardrobe = data.wardrobe || {};
-            state.outfits = data.outfits || {};
-            // AI 참고 이미지는 Storage URL로 저장되므로 그대로 사용
-            state.aiReference = data.aiReference || { images: [], topColor: '', bottomColor: '' };
-            state.settings = data.settings || { theme: 'dark' };
-            
-            applyTheme(state.settings.theme);
-            
-            if (!state.categories.find(c => c.id === state.activeCategory)) {
-              state.activeCategory = state.categories[0]?.id || 'TOPS';
-            }
-            
-            render();
-          }
-        }
-      }, error => {
-        console.error('Firestore sync error:', error);
-        alert(`동기화 오류: ${error.message}\n\n앱을 다시 로드해주세요.`);
-      });
-    }
-
-    onAuthStateChanged(auth, async user => {
-      state.user = user;
-      
-      if (user) {
-        // localStorage에서 AI 참고 자료 로드
-        try {
-          const savedAiReference = localStorage.getItem('aiReference');
-          if (savedAiReference) {
-            state.aiReference = JSON.parse(savedAiReference);
-          }
-        } catch (error) {
-          console.error('LocalStorage load error:', error);
-        }
-
-        // 초기 데이터 로드
-        try {
-          const userDoc = doc(db, 'users', user.uid);
-          const snapshot = await getDoc(userDoc);
-          
-          if (snapshot.exists()) {
-            const data = snapshot.data();
-            state.categories = data.categories || [...DEFAULT_CATEGORIES];
-            state.wardrobe = data.wardrobe || {};
-            state.outfits = data.outfits || {};
-            state.settings = data.settings || { theme: 'dark' };
-            
-            applyTheme(state.settings.theme);
-            
-            if (!state.categories.find(c => c.id === state.activeCategory)) {
-              state.activeCategory = state.categories[0]?.id || 'TOPS';
-            }
-          }
-        } catch (error) {
-          console.error('Initial load error:', error);
-        }
-        
-        render();
-        
-        // 실시간 동기화 시작
-        setupFirestoreSync(user.uid);
-      } else {
-        if (unsubscribeFirestore) {
-          unsubscribeFirestore();
-          unsubscribeFirestore = null;
-        }
-        state.categories = [...DEFAULT_CATEGORIES];
-        state.wardrobe = {};
-        state.outfits = {};
-        state.aiReference = { images: [], topColor: '', bottomColor: '' };
-        state.settings = { theme: 'dark' };
-        applyTheme('dark');
-        render();
-      }
+// 종목코드 형태로 시장(KR/US)을 자동 감지하고, 토글 UI도 함께 동기화합니다.
+// 숫자 5~6자리면 국내, 그 외(알파벳 등)면 미국으로 인식합니다.
+function syncMarketFromSymbol(symbol){
+  const detected = isKR(symbol) ? "KR" : "US";
+  if(detected !== curMarket){
+    curMarket = detected;
+    document.querySelectorAll("#marketSeg button").forEach(x=>{
+      x.classList.toggle("active", x.dataset.market === detected);
     });
+  }
+  return detected;
+}
 
-    applyTheme(state.settings.theme);
-    render();
-  </script>
+async function lookupPrice(){
+  const rawSymbol = document.getElementById("inpSymbol").value.trim();
+  const symbol = rawSymbol.toUpperCase();
+  const date = document.getElementById("inpDate").value;
+  const namePreview = document.getElementById("namePreview");
+  const previewName = document.getElementById("previewName");
+  if(!symbol){ namePreview.classList.add("hidden"); return; }
+  const market = syncMarketFromSymbol(symbol);
+
+  // 종목명 조회 (날짜와 무관하게 종목코드만 있으면 바로 조회)
+  namePreview.classList.remove("hidden");
+  previewName.innerHTML = '<span class="spinner"></span>';
+  getStockName(symbol, market).then(name=>{
+    previewName.textContent = name || "조회되지 않음 (직접 확인해주세요)";
+  });
+
+  if(!date) return;
+  const preview = document.getElementById("pricePreview");
+  preview.classList.remove("hidden");
+  document.getElementById("previewPrice").innerHTML = '<span class="spinner"></span>';
+  try{
+    const price = await getPriceOnDate(symbol, market, date);
+    if(price === undefined || price === null || isNaN(price) || price <= 0){
+      throw new Error("가격을 찾을 수 없습니다");
+    }
+    const ccy = market==="US" ? "USD" : "KRW";
+    document.getElementById("previewPrice").innerHTML = `<b>${fmtMoney(price, ccy)}</b>`;
+    document.getElementById("inpPrice").value = Math.round(price*100)/100;
+  }catch(e){
+    document.getElementById("previewPrice").textContent = "조회 실패: 종목코드/날짜를 확인하거나 매수가를 직접 입력해주세요.";
+    document.getElementById("inpPrice").value = "";
+  }
+}
+
+document.getElementById("btnSave").addEventListener("click", async ()=>{
+  const msg = document.getElementById("inputMsg");
+  const btn = document.getElementById("btnSave");
+  btn.disabled = true;
+  msg.style.color = "var(--sub)";
+  msg.textContent = "저장 중...";
+  try{
+    let stockName = "";
+    let result;
+    if(curAssetType === "stock"){
+      const symbol = document.getElementById("inpSymbol").value.trim().toUpperCase();
+      const sector = document.getElementById("inpSector").value.trim();
+      const date = document.getElementById("inpDate").value;
+      const qty = Number(document.getElementById("inpQty").value);
+      const price = Number(document.getElementById("inpPrice").value);
+      const market = symbol ? syncMarketFromSymbol(symbol) : curMarket;
+      if(!symbol || !date || !qty || !price || isNaN(price) || price<=0){
+        msg.style.color = "var(--down)";
+        msg.textContent = "종목코드 / 매수일자 / 수량 / 매수가를 모두 정확히 입력해주세요.";
+        return;
+      }
+      const namePreviewText = document.getElementById("previewName")?.textContent;
+      stockName = (namePreviewText && !namePreviewText.includes("조회되지") && !namePreviewText.includes("...")) ? namePreviewText : symbol;
+      result = await saveTransaction({ assetType:"stock", market, symbol, name: stockName, sector, date, quantity:qty, price, currency: market==="US"?"USD":"KRW", createdAt: Date.now() });
+    } else {
+      const date = document.getElementById("inpCashDate").value;
+      const amount = Number(document.getElementById("inpCashAmt").value);
+      if(!date || !amount){
+        msg.style.color = "var(--down)";
+        msg.textContent = "날짜와 금액을 모두 입력해주세요.";
+        return;
+      }
+      result = await saveTransaction({ assetType:"cash", date, amount, currency: curCcy, createdAt: Date.now() });
+    }
+
+    if(result.mode === "server"){
+      msg.style.color = "var(--up)";
+      msg.textContent = "저장되었습니다. 대시보드/자산/추이에 반영했어요.";
+      toast("저장되었습니다 ✓");
+    } else {
+      // Firestore 쓰기 실패 → 로컬에 저장됨. 화면 반영은 되지만 서버 동기화는 안 된 상태.
+      msg.style.color = "var(--gold)";
+      const code = result.error?.code || "";
+      if(code === "permission-denied"){
+        msg.textContent = "⚠ Firebase 저장 권한이 막혀 있어 이 기기에만 임시 저장했습니다. Firestore 보안 규칙(allow read, write: if true)을 게시해주세요.";
+      } else {
+        msg.textContent = "⚠ 서버 저장에 실패해 이 기기에만 임시 저장했습니다 (" + (result.error?.message || "알 수 없는 오류") + ").";
+      }
+      toast("이 기기에 임시 저장됨");
+    }
+
+    ["inpSymbol","inpSector","inpQty","inpPrice","inpCashAmt"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("pricePreview").classList.add("hidden");
+    document.getElementById("namePreview").classList.add("hidden");
+    await reloadAll();
+    renderTxList();
+  }catch(e){
+    console.error(e);
+    msg.style.color = "var(--down)";
+    msg.textContent = "저장 중 오류가 발생했습니다: " + e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+function renderTxList(){
+  const list = document.getElementById("txList");
+  const recent = [...transactions].sort((a,b)=>b.createdAt-a.createdAt).slice(0,8);
+  if(recent.length===0){ list.innerHTML='<div class="empty">내역이 없습니다.</div>'; return; }
+  list.innerHTML = recent.map(t=>{
+    if(t.assetType==="cash"){
+      return `<div class="holding"><div><div class="name">현금</div><div class="sub">${t.date}</div></div><div class="right"><div class="val">${fmtMoney(t.amount,t.currency)}</div></div></div>`;
+    }
+    return `<div class="holding"><div><div class="name">${t.symbol}</div><div class="sub">${t.date} · ${t.market}</div></div><div class="right"><div class="val">${t.quantity}주 · ${fmtMoney(t.price,t.currency)}</div></div></div>`;
+  }).join("");
+}
+
+/* ============================================================
+   SETTINGS tab
+============================================================ */
+const themeSwitch = document.getElementById("themeSwitch");
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  themeSwitch.classList.toggle("on", t==="dark");
+  localStorage.setItem("theme", t);
+}
+themeSwitch.addEventListener("click", ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  applyTheme(cur==="dark" ? "light" : "dark");
+});
+applyTheme(localStorage.getItem("theme") || "dark");
+
+document.getElementById("btnRefresh").addEventListener("click", async ()=>{
+  toast("시세를 새로고침 중입니다...");
+  await reloadAll();
+  toast("새로고침 완료 ✓");
+});
+document.getElementById("btnClear").addEventListener("click", async ()=>{
+  if(!confirm("모든 입력 데이터를 삭제하시겠습니까? 되돌릴 수 없습니다.")) return;
+  try{
+    const snap = await TX_COL.get();
+    await Promise.all(snap.docs.map(d=>d.ref.delete()));
+  }catch(e){ console.error("서버 데이터 삭제 실패:", e); }
+  localStorage.removeItem("pendingTx");
+  await reloadAll();
+  toast("삭제되었습니다.");
+});
+
+/* ============================================================
+   Init / reload
+============================================================ */
+async function reloadAll(){
+  await loadTransactions();
+  let holdings = buildHoldings();
+  holdings = await refreshQuotes(holdings);
+  window.__holdings = holdings;
+  await renderDashboard(holdings);
+  renderAssets(holdings);
+  await saveSnapshotIfNeeded(holdings);
+  await renderTrend();
+  renderTxList();
+}
+
+function hideSplash(){
+  document.getElementById("splash").style.display="none";
+  document.getElementById("app").style.display="flex";
+}
+
+(function init(){
+  // default dates = today
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById("inpDate").value = today;
+  document.getElementById("inpCashDate").value = today;
+
+  // 스플래시는 데이터 로딩 성공 여부와 상관없이 5초 후 무조건 사라집니다.
+  setTimeout(hideSplash, 5000);
+
+  // 데이터 로딩은 별도로 진행하고, 실패해도 앱 자체는 항상 뜨도록 처리합니다.
+  (async ()=>{
+    try{ await loadFx(); }catch(e){ console.error("FX load failed", e); }
+    try{ await reloadAll(); }catch(e){
+      console.error("reloadAll failed", e);
+      toast("일부 데이터를 불러오지 못했습니다. 설정 탭에서 새로고침 해보세요.");
+    }
+  })();
+})();
+</script>
 </body>
 </html>
