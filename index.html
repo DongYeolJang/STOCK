@@ -430,11 +430,11 @@ h1,h2,h3{font-weight:700;color:#191F28}
           <div class="fx-flag">$</div>
           <div>
             <div class="fx-name">USD → KRW</div>
-            <div class="fx-rate" id="fxRate">1,382.50원</div>
+            <div class="fx-rate" id="fxRate">불러오는 중...</div>
           </div>
         </div>
         <div style="text-align:right">
-          <div class="fx-change up" id="fxChange">+4.20 (+0.31%)</div>
+          <div class="fx-change" id="fxChange" style="color:var(--sub)">-</div>
           <div style="font-size:11px;color:var(--sub);margin-top:2px" id="fxLiveBadge">불러오는 중...</div>
         </div>
       </div>
@@ -683,18 +683,18 @@ const stocks = [
 
 const sectorColors = {'반도체':'#3182F6','IT':'#60A5FA','소비재':'#93C5FD','에너지':'#1B64DA','기타':'#BFDBFE'};
 
-// 전체 시세 카탈로그 (관심종목 등록용 - 야후파이낸스 연동 예정, 지금은 더미)
+// 전체 시세 카탈로그 (관심종목 등록용 - 야후파이낸스에서 실시간으로 채워짐, 더미 가격 없음)
 const marketCatalog = [
-  {name:'삼성전자', code:'005930', price:78900, changePct:1.28, badge:'삼성', high:89500},
-  {name:'애플', code:'AAPL', price:243100, changePct:-0.62, badge:'AAPL', high:265800},
-  {name:'테슬라', code:'TSLA', price:352400, changePct:2.14, badge:'TSLA', high:398200},
-  {name:'엔비디아', code:'NVDA', price:198700, changePct:3.05, badge:'NVDA', high:231500},
-  {name:'카카오', code:'035720', price:41250, changePct:-1.10, badge:'카카오', high:52300},
-  {name:'네이버', code:'035420', price:214500, changePct:0.85, badge:'네이버', high:238900},
-  {name:'현대차', code:'005380', price:251000, changePct:-0.35, badge:'현대차', high:279800},
-  {name:'마이크로소프트', code:'MSFT', price:612300, changePct:0.44, badge:'MSFT', high:645700},
-  {name:'구글', code:'GOOGL', price:243800, changePct:1.02, badge:'GOOGL', high:268100},
-  {name:'SK하이닉스', code:'000660', price:215500, changePct:2.67, badge:'하이닉스', high:241200},
+  {name:'삼성전자', code:'005930', badge:'삼성', status:'loading'},
+  {name:'애플', code:'AAPL', badge:'AAPL', status:'loading'},
+  {name:'테슬라', code:'TSLA', badge:'TSLA', status:'loading'},
+  {name:'엔비디아', code:'NVDA', badge:'NVDA', status:'loading'},
+  {name:'카카오', code:'035720', badge:'카카오', status:'loading'},
+  {name:'네이버', code:'035420', badge:'네이버', status:'loading'},
+  {name:'현대차', code:'005380', badge:'현대차', status:'loading'},
+  {name:'마이크로소프트', code:'MSFT', badge:'MSFT', status:'loading'},
+  {name:'구글', code:'GOOGL', badge:'GOOGL', status:'loading'},
+  {name:'SK하이닉스', code:'000660', badge:'하이닉스', status:'loading'},
 ];
 
 // 관심종목으로 등록된 코드 목록 (기본값: 일부만 등록된 상태로 시작)
@@ -726,10 +726,30 @@ function renderStockList(){
   const watched = marketCatalog.filter(s=>watchlist.includes(s.code));
   if(watched.length===0){
     wrap.innerHTML = `<div class="empty-state">관심종목을 등록하면 여기에 실시간 시세가 표시돼요.</div>`;
-  }else{
-    wrap.innerHTML = watched.map(s=>{
-      const drawdown = ((s.price - s.high) / s.high) * 100;
+    renderWatchlistSelect();
+    return;
+  }
+  wrap.innerHTML = watched.map(s=>{
+    if(s.status !== 'ok'){
+      // 아직 못 받아왔거나(loading) 실패한(error) 경우 - 가짜 숫자를 보여주지 않음
+      const msg = s.status === 'error' ? '시세를 불러오지 못했어요' : '시세 불러오는 중...';
       return `
+      <div class="stock-row">
+        <div class="stock-left">
+          <div class="stock-badge">${s.badge.slice(0,2)}</div>
+          <div>
+            <div class="stock-name">${s.name}</div>
+            <div class="stock-code">${s.code}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:12.5px;color:var(--sub)">${msg}</div>
+          <button class="stock-remove" onclick="removeWatch('${s.code}')" title="관심종목 삭제">×</button>
+        </div>
+      </div>`;
+    }
+    const drawdown = s.high ? ((s.price - s.high) / s.high) * 100 : null;
+    return `
       <div class="stock-row">
         <div class="stock-left">
           <div class="stock-badge">${s.badge.slice(0,2)}</div>
@@ -745,14 +765,14 @@ function renderStockList(){
             <div class="stock-change ${s.changePct>=0?'up':'down'}" style="color:${s.changePct>=0?'#F04452':'#3182F6'}">
               ${s.changePct>=0?'+':''}${s.changePct.toFixed(2)}%
             </div>
-            <div class="stock-drawdown">고점대비 ${drawdown.toFixed(1)}%</div>
+            ${drawdown!==null ? `<div class="stock-drawdown">고점대비 ${drawdown.toFixed(1)}%</div>` : ''}
           </div>
           <button class="stock-remove" onclick="removeWatch('${s.code}')" title="관심종목 삭제">×</button>
         </div>
       </div>
-    `;}).join('');
-    watched.forEach(s=>drawSparkline(`spark-market-${s.code}`, s.price, s.changePct));
-  }
+    `;
+  }).join('');
+  watched.filter(s=>s.status==='ok').forEach(s=>drawSparkline(`spark-market-${s.code}`, s.price, s.changePct));
   renderWatchlistSelect();
 }
 
@@ -866,7 +886,7 @@ function fearGreedStatus(v){
   if(v<=80) return '탐욕 (Greed)';
   return '극단적 탐욕 (Extreme Greed)';
 }
-renderFearGreedGauge(80);
+document.getElementById('fearGreedGauge').innerHTML = `<div class="empty-state">공포탐욕지수 불러오는 중...</div>`;
 function genSeries(points, startVal, volatility){
   let v = startVal, arr=[v];
   let seed = points*7+13;
@@ -959,7 +979,7 @@ document.getElementById('periodTabs').addEventListener('click',e=>{
 });
 
 /* ===================== USD/KRW 환율 추이 차트 (실제 날짜 기반, 환전 시점 표시) ===================== */
-let liveFxRate = 1382.5; // 실시간 조회 전까지의 기본값(더미)
+let liveFxRate = 1382.5; // 실시간 조회 전 내부 계산(차트 시뮬레이션 등)에만 쓰는 임시값. 화면에는 노출 안 함
 function generateFxHistory(anchorRate){
   const days = 3653; // 약 10년치 일별 데이터
   let seed = 777;
@@ -1267,10 +1287,27 @@ function renderPortfolio(){
   }
   wrap.innerHTML = positions.map((p,i)=>{
     const match = findCatalogByName(p.name);
-    const currentPrice = match ? match.price : p.avgPrice;
+    const live = !!(match && match.status==='ok' && typeof match.price==='number');
     const ticker = match ? match.code : '-';
     const badge = match ? match.badge : p.name;
-    const dailyChangePct = match ? match.changePct : 0;
+
+    if(!live){
+      const msg = match && match.status==='error' ? '시세를 불러오지 못했어요' : '시세 불러오는 중...';
+      return `
+      <div class="holding-card" onclick="openHoldingDetail('${p.name.replace(/'/g,"\\'")}')">
+        <div class="holding-top">
+          <div class="stock-badge">${badge.slice(0,2)}</div>
+          <div class="holding-info">
+            <div class="holding-name">${p.name}</div>
+            <div class="holding-ticker">${ticker} · ${fmtNum(p.qty)}주</div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;color:var(--sub);margin-left:auto">${msg}</div>
+      </div>`;
+    }
+
+    const currentPrice = match.price;
+    const dailyChangePct = match.changePct;
     const evalAmount = currentPrice * p.qty;
     const totalReturn = (currentPrice - p.avgPrice) * p.qty;
     const totalReturnPct = p.avgPrice ? ((currentPrice - p.avgPrice)/p.avgPrice)*100 : 0;
@@ -1306,9 +1343,9 @@ function renderPortfolio(){
   }).join('');
   positions.forEach((p,i)=>{
     const match = findCatalogByName(p.name);
-    const currentPrice = match ? match.price : p.avgPrice;
-    const changePct = match ? match.changePct : 0;
-    drawSparkline(`spark-port-${i}`, currentPrice, changePct);
+    if(match && match.status==='ok' && typeof match.price==='number'){
+      drawSparkline(`spark-port-${i}`, match.price, match.changePct);
+    }
   });
 }
 renderPortfolio();
@@ -1330,13 +1367,20 @@ function generateHistory(days, endVal, vol, seedBase){
 }
 const stockHistoryCache = {};
 function getStockHistory(name){
-  if(stockHistoryCache[name]) return stockHistoryCache[name];
   const match = findCatalogByName(name);
-  const endVal = match ? match.price : 50000;
+  const live = !!(match && match.status==='ok' && typeof match.price==='number');
+  const cached = stockHistoryCache[name];
+  if(cached && (!live || cached.anchor === match.price)) return cached.data;
+
+  const buys = holdings.filter(h=>h.name===name);
+  const totalQty = buys.reduce((s,h)=>s+h.qty,0);
+  const avgBuyPrice = totalQty ? buys.reduce((s,h)=>s+h.price*h.qty,0)/totalQty : 0;
+  const endVal = live ? match.price : avgBuyPrice; // 실시간 시세 없으면 실제 매수 평단가를 기준으로 표시
+
   let seedBase = 11;
   for(let i=0;i<name.length;i++) seedBase += name.charCodeAt(i)*7;
   const hist = generateHistory(3653, endVal, 0.022, seedBase);
-  stockHistoryCache[name] = hist;
+  stockHistoryCache[name] = { data: hist, anchor: endVal };
   return hist;
 }
 function sliceHistoryForPeriod(history, period){
@@ -1677,14 +1721,16 @@ async function fetchLiveExchangeRate(){
     const data = await res.json();
     if(data && data.result === 'success' && data.rates && data.rates.KRW){
       const rate = Math.round(data.rates.KRW*100)/100;
-      const baseline = liveFxRate; // 직전 기준값 대비 변화 표시
       liveFxRate = rate;
       document.getElementById('fxRate').textContent = rate.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})+'원';
-      const diff = rate - baseline;
-      const pct = baseline ? (diff/baseline)*100 : 0;
+      // open.er-api.com 무료 티어는 전일 대비 변동값을 제공하지 않아서, 가짜 등락률을 만들지 않고
+      // 실시간으로 갱신된 시각만 표시해요.
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
       const changeEl = document.getElementById('fxChange');
-      changeEl.textContent = `${diff>=0?'+':''}${diff.toFixed(2)} (${diff>=0?'+':''}${pct.toFixed(2)}%)`;
-      changeEl.style.color = diff>=0 ? '#F04452' : '#3182F6';
+      changeEl.textContent = `실시간 갱신 · ${hh}:${mm}`;
+      changeEl.style.color = 'var(--sub)';
       // 히스토리 그래프 마지막(오늘) 값도 실시간 환율로 갱신
       fxHistory = generateFxHistory(rate);
       refreshFxTab();
@@ -1693,7 +1739,11 @@ async function fetchLiveExchangeRate(){
     }
     throw new Error('unexpected response shape');
   }catch(e){
-    console.warn('[환율 실시간 조회 실패, 더미 데이터 유지]', e.message);
+    console.warn('[환율 실시간 조회 실패]', e.message);
+    document.getElementById('fxRate').textContent = '불러오지 못했어요';
+    const changeEl = document.getElementById('fxChange');
+    changeEl.textContent = '-';
+    changeEl.style.color = 'var(--sub)';
     setLiveBadge('fxLiveBadge', false, e.message);
   }
 }
@@ -1719,11 +1769,14 @@ async function fetchLiveQuote(item){
       item.price = Math.round(price * fx);
       item.changePct = prevClose ? Math.round(((price-prevClose)/prevClose)*10000)/100 : 0; // 등락률은 환산해도 동일
       if(typeof meta.fiftyTwoWeekHigh === 'number') item.high = Math.round(meta.fiftyTwoWeekHigh * fx);
+      item.status = 'ok';
       return { ok:true };
     }
+    item.status = 'error';
     return { ok:false, err:'unexpected response shape' };
   }catch(e){
     console.warn('[시세 조회 실패]', item.code, e.message);
+    item.status = 'error';
     return { ok:false, err:e.message };
   }
 }
@@ -1749,7 +1802,8 @@ async function fetchLiveFearGreed(){
     }
     throw new Error('unexpected response shape');
   }catch(e){
-    console.warn('[공포탐욕지수 조회 실패, 더미 데이터 유지]', e.message);
+    console.warn('[공포탐욕지수 조회 실패]', e.message);
+    document.getElementById('fearGreedGauge').innerHTML = `<div class="empty-state">공포탐욕지수를 불러오지 못했어요</div>`;
     setLiveBadge('fgLiveBadge', false, e.message);
   }
 }
