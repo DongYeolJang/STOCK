@@ -735,7 +735,7 @@ function renderStockList(){
           <div class="stock-badge">${s.badge.slice(0,2)}</div>
           <div>
             <div class="stock-name">${s.name}</div>
-            <div class="stock-code">${s.code}</div>
+            <div class="stock-code">${s.code}${s.currency && s.currency!=='KRW' && s.priceLocal ? ' · $'+s.priceLocal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}</div>
           </div>
         </div>
         <div class="stock-spark"><canvas id="spark-market-${s.code}"></canvas></div>
@@ -1710,9 +1710,15 @@ async function fetchLiveQuote(item){
     if(meta && typeof meta.regularMarketPrice === 'number'){
       const price = meta.regularMarketPrice;
       const prevClose = meta.chartPreviousClose || meta.previousClose || price;
-      item.price = Math.round(price);
-      item.changePct = prevClose ? Math.round(((price-prevClose)/prevClose)*10000)/100 : 0;
-      if(typeof meta.fiftyTwoWeekHigh === 'number') item.high = Math.round(meta.fiftyTwoWeekHigh);
+      const currency = meta.currency || 'KRW';
+      const isForeign = currency !== 'KRW';
+      const fx = isForeign ? liveFxRate : 1; // 해외 종목은 실시간 환율로 원화 환산
+
+      item.currency = currency;
+      item.priceLocal = isForeign ? Math.round(price*100)/100 : null; // 원래 통화 표시용(예: $333.00)
+      item.price = Math.round(price * fx);
+      item.changePct = prevClose ? Math.round(((price-prevClose)/prevClose)*10000)/100 : 0; // 등락률은 환산해도 동일
+      if(typeof meta.fiftyTwoWeekHigh === 'number') item.high = Math.round(meta.fiftyTwoWeekHigh * fx);
       return { ok:true };
     }
     return { ok:false, err:'unexpected response shape' };
@@ -1727,6 +1733,7 @@ async function fetchAllLiveQuotes(){
   const firstError = (results.find(r=>!r.ok)||{}).err;
   setLiveBadge('marketLiveBadge', anySuccess, firstError);
   renderStockList(); // 관심종목 시세 갱신
+  renderPortfolio(); // 보유종목 탭도 같은 카탈로그 시세를 쓰므로 함께 갱신
 }
 
 // ---------- ③ 공포 탐욕 지수 (CNN Fear & Greed) ----------
@@ -1748,9 +1755,12 @@ async function fetchLiveFearGreed(){
 }
 
 // 페이지 로드 후 실시간 데이터로 순차 갱신 (더미 화면이 먼저 보이고, 성공한 항목만 실시간으로 교체됨)
-fetchLiveExchangeRate();
-fetchAllLiveQuotes();
-fetchLiveFearGreed();
+// 환율을 먼저 받아와야 해외 종목 원화 환산이 정확해서 순서대로 실행해요.
+(async function initLiveData(){
+  await fetchLiveExchangeRate();
+  await fetchAllLiveQuotes();
+  fetchLiveFearGreed();
+})();
 </script>
 </body>
 </html>
