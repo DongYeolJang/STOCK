@@ -404,7 +404,7 @@ h1,h2,h3{font-weight:700;color:#191F28}
       <div class="card">
         <div class="section-title">
           <span>공포 탐욕 지수</span>
-          <span style="font-size:11.5px;color:var(--sub);font-weight:500">더미 데이터 · CNN Fear &amp; Greed</span>
+          <span style="font-size:11.5px;font-weight:500" id="fgLiveBadge">불러오는 중...</span>
         </div>
         <div id="fearGreedGauge"></div>
       </div>
@@ -412,7 +412,7 @@ h1,h2,h3{font-weight:700;color:#191F28}
       <div class="card">
         <div class="section-title">
           <span>관심종목 시세</span>
-          <span style="font-size:11.5px;color:var(--sub);font-weight:500">더미 데이터</span>
+          <span style="font-size:11.5px;font-weight:500" id="marketLiveBadge">불러오는 중...</span>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
           <select class="form-select" id="watchlistSelect" style="flex:1"></select>
@@ -435,7 +435,7 @@ h1,h2,h3{font-weight:700;color:#191F28}
         </div>
         <div style="text-align:right">
           <div class="fx-change up" id="fxChange">+4.20 (+0.31%)</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:2px">더미 데이터 · 야후파이낸스 연동 예정</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px" id="fxLiveBadge">불러오는 중...</div>
         </div>
       </div>
 
@@ -958,11 +958,12 @@ document.getElementById('periodTabs').addEventListener('click',e=>{
 });
 
 /* ===================== USD/KRW 환율 추이 차트 (실제 날짜 기반, 환전 시점 표시) ===================== */
-function generateFxHistory(){
+let liveFxRate = 1382.5; // 실시간 조회 전까지의 기본값(더미)
+function generateFxHistory(anchorRate){
   const days = 3653; // 약 10년치 일별 데이터
   let seed = 777;
   function rand(){ seed = (seed*9301+49297)%233280; return seed/233280; }
-  let v = 1382.5;
+  let v = anchorRate;
   const descFromToday = [v];
   for(let i=1;i<days;i++){
     v = v / (1 + (rand()-0.5)*0.006);
@@ -975,10 +976,10 @@ function generateFxHistory(){
     d.setDate(d.getDate() - (days-1-i));
     return { date:d, value: Math.round(val*100)/100 };
   });
-  arr[arr.length-1].value = 1382.5; // 오늘 환율로 마무리
+  arr[arr.length-1].value = anchorRate; // 오늘 환율로 마무리
   return arr;
 }
-const fxHistory = generateFxHistory();
+let fxHistory = generateFxHistory(liveFxRate);
 const fxPeriodDays = {'1m':30,'3m':90,'6m':180,'1y':365,'3y':1095,'5y':1825,'10y':3653};
 
 function sliceFxForPeriod(period){
@@ -1096,7 +1097,7 @@ function renderUsdHoldings(){
     totalKrwSpent += r.amount;
   });
   const avgRate = totalKrwSpent / totalUsd;
-  const currentRate = 1382.5;
+  const currentRate = liveFxRate;
   const evalKrw = totalUsd * currentRate;
   const gain = evalKrw - totalKrwSpent;
   const gainPct = (gain / totalKrwSpent) * 100;
@@ -1604,6 +1605,108 @@ document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
     showToast('저장에 실패했어요. Firestore 보안 규칙을 확인해 주세요');
   }
 });
+
+/* ===================== 실시간 데이터 연동 (야후파이낸스 · 환율 · 공포탐욕지수) =====================
+   - 환율(open.er-api.com): CORS 허용 공개 API라 브라우저에서 바로 호출 가능
+   - 야후파이낸스 / CNN 공포탐욕지수: 브라우저 직접 호출 시 CORS로 막혀서
+     공개 프록시(api.allorigins.win)를 경유해요. 데모/프론트엔드 단계용 임시 방편이며,
+     실제 운영에서는 Firebase Cloud Functions 같은 서버가 대신 호출해주는 구조로 바꾸는 걸 권장해요.
+*/
+const CORS_PROXY = target => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+
+function setLiveBadge(elId, ok){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(ok){
+    el.textContent = '🟢 실시간';
+    el.style.color = '#1B64DA';
+  }else{
+    el.textContent = '⚪ 더미 데이터 (연동 실패)';
+    el.style.color = 'var(--sub)';
+  }
+}
+
+// ---------- ① USD/KRW 환율 ----------
+async function fetchLiveExchangeRate(){
+  try{
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    if(data && data.result === 'success' && data.rates && data.rates.KRW){
+      const rate = Math.round(data.rates.KRW*100)/100;
+      const baseline = liveFxRate; // 직전 기준값 대비 변화 표시
+      liveFxRate = rate;
+      document.getElementById('fxRate').textContent = rate.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})+'원';
+      const diff = rate - baseline;
+      const pct = baseline ? (diff/baseline)*100 : 0;
+      const changeEl = document.getElementById('fxChange');
+      changeEl.textContent = `${diff>=0?'+':''}${diff.toFixed(2)} (${diff>=0?'+':''}${pct.toFixed(2)}%)`;
+      changeEl.style.color = diff>=0 ? '#F04452' : '#3182F6';
+      // 히스토리 그래프 마지막(오늘) 값도 실시간 환율로 갱신
+      fxHistory = generateFxHistory(rate);
+      refreshFxTab();
+      setLiveBadge('fxLiveBadge', true);
+      return;
+    }
+    throw new Error('unexpected response shape');
+  }catch(e){
+    console.warn('환율 실시간 조회 실패, 더미 데이터 유지:', e);
+    setLiveBadge('fxLiveBadge', false);
+  }
+}
+
+// ---------- ② 관심종목 시세 (야후파이낸스) ----------
+function toYahooSymbol(code){
+  return /^[0-9]+$/.test(code) ? `${code}.KS` : code; // 국내 종목코드는 .KS 접미사
+}
+async function fetchLiveQuote(item){
+  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${toYahooSymbol(item.code)}`;
+  try{
+    const res = await fetch(CORS_PROXY(target));
+    const json = await res.json();
+    const meta = json && json.chart && json.chart.result && json.chart.result[0] && json.chart.result[0].meta;
+    if(meta && typeof meta.regularMarketPrice === 'number'){
+      const price = meta.regularMarketPrice;
+      const prevClose = meta.chartPreviousClose || meta.previousClose || price;
+      item.price = Math.round(price);
+      item.changePct = prevClose ? Math.round(((price-prevClose)/prevClose)*10000)/100 : 0;
+      if(typeof meta.fiftyTwoWeekHigh === 'number') item.high = Math.round(meta.fiftyTwoWeekHigh);
+      return true;
+    }
+  }catch(e){
+    console.warn('시세 조회 실패:', item.code, e);
+  }
+  return false;
+}
+async function fetchAllLiveQuotes(){
+  const results = await Promise.all(marketCatalog.map(fetchLiveQuote));
+  const anySuccess = results.some(Boolean);
+  setLiveBadge('marketLiveBadge', anySuccess);
+  renderStockList(); // 관심종목 시세 갱신
+}
+
+// ---------- ③ 공포 탐욕 지수 (CNN Fear & Greed) ----------
+async function fetchLiveFearGreed(){
+  const target = 'https://production.dataviz.cnn.io/index/fearandgreed/graphdata';
+  try{
+    const res = await fetch(CORS_PROXY(target));
+    const json = await res.json();
+    const score = json && json.fear_and_greed && json.fear_and_greed.score;
+    if(typeof score === 'number'){
+      renderFearGreedGauge(Math.round(score));
+      setLiveBadge('fgLiveBadge', true);
+      return;
+    }
+    throw new Error('unexpected response shape');
+  }catch(e){
+    console.warn('공포탐욕지수 조회 실패, 더미 데이터 유지:', e);
+    setLiveBadge('fgLiveBadge', false);
+  }
+}
+
+// 페이지 로드 후 실시간 데이터로 순차 갱신 (더미 화면이 먼저 보이고, 성공한 항목만 실시간으로 교체됨)
+fetchLiveExchangeRate();
+fetchAllLiveQuotes();
+fetchLiveFearGreed();
 </script>
 </body>
 </html>
