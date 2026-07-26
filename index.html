@@ -1714,7 +1714,7 @@ const auth = firebase.auth();
 const db = firebase.firestore(); // 다음 단계(마이페이지)에서 프로필 저장에 사용 예정
 // Firestore의 기본 WebChannel 스트리밍 연결이 광고차단기/일부 네트워크 환경에서 막혀
 // "client is offline" 오류가 나는 경우가 있어, 롱폴링으로 자동 전환되도록 설정해요.
-db.settings({ experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+db.settings({ experimentalForceLongPolling: true, useFetchStreams: false });
 
 function showAuthError(msg){
   const el = document.getElementById('authError');
@@ -1764,9 +1764,19 @@ document.getElementById('googleLoginBtn').addEventListener('click', async ()=>{
   clearAuthError();
   const provider = new firebase.auth.GoogleAuthProvider();
   try{
-    await auth.signInWithPopup(provider);
-    showToast('Google 로그인 완료');
+    // signInWithPopup은 브라우저의 Cross-Origin-Opener-Policy 정책 때문에
+    // 팝업 닫힘 감지가 막혀 오류가 날 수 있어서, 리다이렉트 방식을 사용해요.
+    await auth.signInWithRedirect(provider);
   }catch(e){ showAuthError(translateAuthError(e)); }
+});
+
+// Google 리다이렉트 로그인에서 돌아온 뒤 결과(성공/실패)를 확인
+auth.getRedirectResult().then(result=>{
+  if(result && result.user){
+    showToast('Google 로그인 완료');
+  }
+}).catch(e=>{
+  showAuthError(translateAuthError(e));
 });
 
 document.getElementById('logoutBtn').addEventListener('click', async ()=>{
@@ -1850,8 +1860,10 @@ function showFirestoreError(codeOrMsg){
   let hint = codeOrMsg;
   if(String(codeOrMsg).includes('permission-denied')){
     hint = 'permission-denied — Firestore 보안 규칙이 아직 게시되지 않았거나 잘못됐어요. 콘솔 > Firestore Database > 규칙에서 확인해 주세요.';
-  }else if(String(codeOrMsg).includes('unavailable') || String(codeOrMsg).includes('not-found')){
+  }else if(String(codeOrMsg).includes('not-found')){
     hint = codeOrMsg+' — Firestore 데이터베이스가 아직 생성되지 않았을 수 있어요. 콘솔 > Firestore Database에서 "데이터베이스 만들기"를 먼저 진행해 주세요.';
+  }else if(String(codeOrMsg).includes('unavailable')){
+    hint = codeOrMsg+' — 서버 연결 자체가 막힌 상태예요. 광고차단기/보안 확장프로그램을 끄거나 시크릿 모드로 다시 시도해 보시고, 회사·학교 네트워크라면 방화벽이 firestore.googleapis.com을 막고 있을 수 있어요(다른 네트워크에서 테스트 권장).';
   }
   el.textContent = '⚠️ '+hint;
   el.style.display = 'block';
