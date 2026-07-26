@@ -63,6 +63,23 @@ h1,h2,h3{font-weight:700;color:#191F28}
 /* ===== 레이아웃 ===== */
 .app{max-width:1120px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
+/* ===== 로그인 게이트 ===== */
+.auth-gate{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;z-index:100;
+}
+.auth-gate-card{
+  width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:32px 28px;box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+.spinner{
+  width:32px;height:32px;border-radius:50%;margin:0 auto;
+  border:3px solid var(--border);border-top-color:var(--primary);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
 .topbar{
   background:var(--surface);
   border-bottom:1px solid var(--border);
@@ -288,7 +305,57 @@ h1,h2,h3{font-weight:700;color:#191F28}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ===================== 로그인 게이트 (로그인 전엔 앱 전체를 가림) ===================== -->
+<div id="authGate" class="auth-gate">
+  <div class="auth-gate-card">
+    <div class="brand" style="justify-content:center;margin-bottom:24px"><span class="dot"></span>Bboggl</div>
+
+    <!-- 로그인 상태 확인 중 -->
+    <div id="authChecking" style="text-align:center;padding:24px 0">
+      <div class="spinner"></div>
+      <div style="font-size:13px;color:var(--sub);margin-top:14px">로그인 확인 중...</div>
+    </div>
+
+    <!-- 비로그인 상태: 로그인/회원가입 폼 -->
+    <div id="authLoginForm" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-weight:700;font-size:17px;color:#191F28">로그인이 필요해요</div>
+        <div style="font-size:13px;color:var(--sub);margin-top:4px">이메일 또는 Google 계정으로 계속하세요</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input class="form-input" id="authEmail" type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-input" id="authPassword" type="password" placeholder="6자 이상">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" id="loginBtn">로그인</button>
+        <button class="btn btn-outline" style="flex:1" id="signupBtn">회원가입</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--sub);font-size:12px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>또는<div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <button class="btn btn-outline" style="width:100%" id="googleLoginBtn">
+        <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center;width:100%">
+          <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.3-.3-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 6.1 29.5 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.1-11.3-7.6l-6.6 5.1C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.4 5.4C41 35.9 44 30.5 44 24c0-1.2-.1-2.3-.3-3.5z"/></svg>
+          Google로 계속하기
+        </span>
+      </button>
+      <div id="authError" style="color:#F04452;font-size:12.5px;margin-top:10px;display:none"></div>
+
+      <div class="notice-box" style="text-align:left">
+        <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+        <span>Firebase Authentication으로 로그인돼요. 카카오 로그인은 Firebase 콘솔에서 커스텀 OIDC 공급자 등록이 추가로 필요해요.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app" style="display:none" id="appRoot">
 
   <div class="topbar">
     <div class="brand"><span class="dot"></span>Bboggl</div>
@@ -583,47 +650,8 @@ h1,h2,h3{font-weight:700;color:#191F28}
 
     <!-- ================= 마이페이지 ================= -->
     <section class="tab-panel" id="panel-my">
-      <!-- 비로그인 상태: 로그인/회원가입 폼 -->
-      <div class="card" style="text-align:center;padding:32px 20px" id="myGuestView">
-        <div class="mypage-avatar">
-          <svg class="icon" viewBox="0 0 24 24" style="width:32px;height:32px;color:var(--primary)"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
-        </div>
-        <div style="font-weight:700;font-size:16px;color:#191F28">로그인이 필요해요</div>
-        <div style="font-size:13px;color:var(--sub);margin-top:2px">이메일 또는 Google 계정으로 계속하세요</div>
-
-        <div style="margin-top:20px;text-align:left">
-          <div class="form-group">
-            <label class="form-label">이메일</label>
-            <input class="form-input" id="authEmail" type="email" placeholder="you@example.com">
-          </div>
-          <div class="form-group">
-            <label class="form-label">비밀번호</label>
-            <input class="form-input" id="authPassword" type="password" placeholder="6자 이상">
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn" style="flex:1" id="loginBtn">로그인</button>
-            <button class="btn btn-outline" style="flex:1" id="signupBtn">회원가입</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--sub);font-size:12px">
-            <div style="flex:1;height:1px;background:var(--border)"></div>또는<div style="flex:1;height:1px;background:var(--border)"></div>
-          </div>
-          <button class="btn btn-outline" style="width:100%" id="googleLoginBtn">
-            <span style="display:inline-flex;align-items:center;gap:8px;justify-content:center;width:100%">
-              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.3-.3-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 6.1 29.5 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.1-11.3-7.6l-6.6 5.1C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.4 5.4C41 35.9 44 30.5 44 24c0-1.2-.1-2.3-.3-3.5z"/></svg>
-              Google로 계속하기
-            </span>
-          </button>
-          <div id="authError" style="color:#F04452;font-size:12.5px;margin-top:10px;display:none"></div>
-        </div>
-
-        <div class="notice-box" style="text-align:left">
-          <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
-          <span>Firebase Authentication으로 로그인돼요. 카카오 로그인은 Firebase 콘솔에서 커스텀 OIDC 공급자 등록이 추가로 필요해요.</span>
-        </div>
-      </div>
-
       <!-- 로그인 상태: 프로필 (Firestore 연동) -->
-      <div class="card" style="padding:28px 20px;display:none" id="myLoggedInView">
+      <div class="card" style="padding:28px 20px" id="myLoggedInView">
         <div style="text-align:center">
           <div class="mypage-avatar" id="myAvatarInitial" style="font-size:22px;font-weight:700;color:var(--primary)"></div>
           <div style="font-size:13px;color:var(--sub);margin-top:8px" id="myUserEmailDisplay">-</div>
@@ -1747,19 +1775,34 @@ document.getElementById('logoutBtn').addEventListener('click', async ()=>{
 });
 
 // 보호 라우트 가드: 로그인 여부에 따라 마이페이지 화면 전환 + 프로필 로드
+let hasEnteredAppOnce = false; // 로그인 성공 시 딱 한 번만 홈 탭으로 강제 이동시키기 위한 플래그
+
 auth.onAuthStateChanged(async user=>{
-  const guestView = document.getElementById('myGuestView');
-  const loggedView = document.getElementById('myLoggedInView');
+  const authGate = document.getElementById('authGate');
+  const appRoot = document.getElementById('appRoot');
+  const authChecking = document.getElementById('authChecking');
+  const authLoginForm = document.getElementById('authLoginForm');
+
   if(user){
-    guestView.style.display = 'none';
-    loggedView.style.display = 'block';
+    // 로그인 완료 → 앱 화면을 보여주고, 처음 진입이면 홈 탭으로 이동
+    authGate.style.display = 'none';
+    appRoot.style.display = 'flex';
+    if(!hasEnteredAppOnce){
+      setTab('home');
+      hasEnteredAppOnce = true;
+    }
+
     document.getElementById('myUserEmailDisplay').textContent = user.email || '';
     const joined = user.metadata && user.metadata.creationTime ? new Date(user.metadata.creationTime) : null;
     document.getElementById('profileJoinedAt').textContent = joined ? joined.toLocaleDateString('ko-KR') : '-';
     await loadProfile(user);
   }else{
-    guestView.style.display = 'block';
-    loggedView.style.display = 'none';
+    // 로그아웃/미로그인 → 앱을 가리고 로그인 폼을 보여줌 (확인 중 스피너는 끔)
+    hasEnteredAppOnce = false;
+    appRoot.style.display = 'none';
+    authGate.style.display = 'flex';
+    authChecking.style.display = 'none';
+    authLoginForm.style.display = 'block';
   }
 });
 
