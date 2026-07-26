@@ -297,6 +297,7 @@ h1,h2,h3{font-weight:700;color:#191F28}
       <button data-tab="portfolio">보유종목</button>
       <button data-tab="market">시세</button>
       <button data-tab="fx">환율</button>
+      <button data-tab="cash">현금</button>
       <button data-tab="buy">매수 입력</button>
       <button data-tab="my">마이페이지</button>
     </nav>
@@ -309,17 +310,17 @@ h1,h2,h3{font-weight:700;color:#191F28}
       <div class="hero-card">
         <div class="hero-label">내 총자산</div>
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px">
-          <div class="hero-amount" id="heroTotal" style="margin-bottom:0">52,340,000원</div>
-          <div class="hero-principal" id="heroPrincipal">원금 45,520,000원</div>
+          <div class="hero-amount" id="heroTotal" style="margin-bottom:0">-</div>
+          <div class="hero-principal" id="heroPrincipal">원금 -</div>
         </div>
         <div class="hero-stats">
           <div>
             <div class="hero-stat-label">일간 수익</div>
-            <div class="hero-stat-value up" id="heroDaily">+182,000원 (+0.35%)</div>
+            <div class="hero-stat-value" id="heroDaily">-</div>
           </div>
           <div>
             <div class="hero-stat-label">총 수익</div>
-            <div class="hero-stat-value up" id="heroTotalReturn">+6,820,000원 (+15.0%)</div>
+            <div class="hero-stat-value" id="heroTotalReturn">-</div>
           </div>
         </div>
       </div>
@@ -507,6 +508,45 @@ h1,h2,h3{font-weight:700;color:#191F28}
       </div>
     </section>
 
+    <!-- ================= 현금 ================= -->
+    <section class="tab-panel" id="panel-cash">
+      <div class="card">
+        <div class="section-title">현금 잔고 입력</div>
+        <div class="form-group">
+          <label class="form-label">원화 현금</label>
+          <input class="form-input" id="cashKrwInput" type="number" placeholder="예: 3000000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">달러 현금</label>
+          <input class="form-input" id="cashUsdInput" type="number" placeholder="예: 500">
+        </div>
+        <button class="btn" style="width:100%" id="saveCashBtn">현금 잔고 저장</button>
+        <div style="font-size:11.5px;color:var(--sub);margin-top:10px">
+          * 달러 현금은 실시간 환율로 원화 환산되어 홈 탭의 "현금·주식 비중"에 반영돼요.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">현금 현황</div>
+        <div class="usd-holding-row">
+          <span class="usd-holding-label">원화 현금</span>
+          <span class="usd-holding-value" id="cashKrwStatus">0원</span>
+        </div>
+        <div class="usd-holding-row">
+          <span class="usd-holding-label">달러 현금</span>
+          <span class="usd-holding-value" id="cashUsdStatus">$0.00</span>
+        </div>
+        <div class="usd-holding-row">
+          <span class="usd-holding-label">달러 → 원화 환산</span>
+          <span class="usd-holding-value" id="cashUsdInKrwStatus">0원</span>
+        </div>
+        <div class="usd-holding-row">
+          <span class="usd-holding-label">현금 합계 (원화 환산)</span>
+          <span class="usd-holding-value" id="cashTotalStatus" style="color:var(--primary)">0원</span>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= 매수 입력 ================= -->
     <section class="tab-panel" id="panel-buy">
       <div class="card">
@@ -632,6 +672,9 @@ h1,h2,h3{font-weight:700;color:#191F28}
       <button data-tab="fx">
         <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.9V18h-2v-1.1c-1.4-.3-2.5-1.2-2.6-2.7h1.7c.1.7.7 1.2 1.7 1.2.9 0 1.6-.4 1.6-1.1 0-.6-.5-.9-1.9-1.3-1.8-.5-2.9-1.1-2.9-2.7 0-1.3 1-2.2 2.4-2.5V6h2v1c1.3.3 2.2 1.1 2.3 2.5h-1.7c-.1-.6-.6-1-1.5-1-.8 0-1.4.4-1.4 1 0 .6.5.8 1.9 1.2 2 .5 2.9 1.2 2.9 2.8 0 1.4-1.1 2.3-2.5 2.4z"/></svg>환율
       </button>
+      <button data-tab="cash">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M2 6h20v12H2zm2 2v8h16V8zm8 1a3 3 0 110 6 3 3 0 010-6zM6 9v2a2 2 0 01-2-2zm14 0h2a2 2 0 01-2 2zm-14 6h-2a2 2 0 002-2zm14 0v2a2 2 0 002-2z"/></svg>현금
+      </button>
       <button data-tab="buy">
         <svg class="icon" viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>매수
       </button>
@@ -672,29 +715,20 @@ function showToast(msg){
 const fmtWon = n => n.toLocaleString('ko-KR')+'원';
 const fmtNum = n => n.toLocaleString('ko-KR');
 
-// 보유 종목 (포트폴리오/비중 계산용 - 매수내역 기준)
-const stocks = [
-  {name:'삼성전자', code:'005930', price:78900, changePct:1.28, badge:'삼성', sector:'반도체', shares:80, avgPrice:71200},
-  {name:'애플', code:'AAPL', price:243100, changePct:-0.62, badge:'AAPL', sector:'IT', shares:15, avgPrice:210500},
-  {name:'테슬라', code:'TSLA', price:352400, changePct:2.14, badge:'TSLA', sector:'소비재', shares:6, avgPrice:298000},
-  {name:'엔비디아', code:'NVDA', price:198700, changePct:3.05, badge:'NVDA', sector:'반도체', shares:20, avgPrice:150300},
-  {name:'카카오', code:'035720', price:41250, changePct:-1.10, badge:'카카오', sector:'IT', shares:120, avgPrice:44800},
-];
-
 const sectorColors = {'반도체':'#3182F6','IT':'#60A5FA','소비재':'#93C5FD','에너지':'#1B64DA','기타':'#BFDBFE'};
 
-// 전체 시세 카탈로그 (관심종목 등록용 - 야후파이낸스에서 실시간으로 채워짐, 더미 가격 없음)
+// 전체 시세 카탈로그 (관심종목 등록·보유종목 시세용 - 야후파이낸스에서 실시간으로 채워짐, 더미 가격 없음)
 const marketCatalog = [
-  {name:'삼성전자', code:'005930', badge:'삼성', status:'loading'},
-  {name:'애플', code:'AAPL', badge:'AAPL', status:'loading'},
-  {name:'테슬라', code:'TSLA', badge:'TSLA', status:'loading'},
-  {name:'엔비디아', code:'NVDA', badge:'NVDA', status:'loading'},
-  {name:'카카오', code:'035720', badge:'카카오', status:'loading'},
-  {name:'네이버', code:'035420', badge:'네이버', status:'loading'},
-  {name:'현대차', code:'005380', badge:'현대차', status:'loading'},
-  {name:'마이크로소프트', code:'MSFT', badge:'MSFT', status:'loading'},
-  {name:'구글', code:'GOOGL', badge:'GOOGL', status:'loading'},
-  {name:'SK하이닉스', code:'000660', badge:'하이닉스', status:'loading'},
+  {name:'삼성전자', code:'005930', badge:'삼성', sector:'반도체', status:'loading'},
+  {name:'애플', code:'AAPL', badge:'AAPL', sector:'IT', status:'loading'},
+  {name:'테슬라', code:'TSLA', badge:'TSLA', sector:'소비재', status:'loading'},
+  {name:'엔비디아', code:'NVDA', badge:'NVDA', sector:'반도체', status:'loading'},
+  {name:'카카오', code:'035720', badge:'카카오', sector:'IT', status:'loading'},
+  {name:'네이버', code:'035420', badge:'네이버', sector:'IT', status:'loading'},
+  {name:'현대차', code:'005380', badge:'현대차', sector:'소비재', status:'loading'},
+  {name:'마이크로소프트', code:'MSFT', badge:'MSFT', sector:'IT', status:'loading'},
+  {name:'구글', code:'GOOGL', badge:'GOOGL', sector:'IT', status:'loading'},
+  {name:'SK하이닉스', code:'000660', badge:'하이닉스', sector:'반도체', status:'loading'},
 ];
 
 // 관심종목으로 등록된 코드 목록 (기본값: 일부만 등록된 상태로 시작)
@@ -906,8 +940,6 @@ const periodConfig = {
   '5y':{points:20, labelFn:i=>`${(i+1)*3}개월`, vol:0.045, start:15000000},
   '10y':{points:20, labelFn:i=>`${(i+1)*6}개월`, vol:0.05, start:6200000},
 };
-const totalPrincipal = 45520000; // 원금 (총자산 - 총수익)
-
 function genPrincipalSeries(points, endVal){
   let seed = points*13+5;
   function rand(){ seed=(seed*9301+49297)%233280; return seed/233280; }
@@ -925,9 +957,16 @@ function genPrincipalSeries(points, endVal){
 let assetChart;
 function renderAssetChart(period){
   const cfg = periodConfig[period];
-  const data = genSeries(cfg.points, cfg.start, cfg.vol);
-  data[data.length-1] = 52340000; // 현재 자산으로 마무리
-  const principalData = genPrincipalSeries(cfg.points, totalPrincipal);
+  const summary = computePortfolioSummary(); // 보유종목 기준 실제 총자산/원금
+  const currentTotal = Math.round(summary.totalEval);
+  const currentPrincipal = Math.round(summary.totalCost);
+  // 더미로 만들어둔 곡선의 굴곡(변동성 형태)은 유지하되, 실제 총자산 규모에 맞게 스케일만 조정
+  // 곡선의 변동성 형태는 유지하되(더미가 아니라 순수 시각적 스케일 기준점), 실제 총자산 규모에 맞게 진폭만 조정
+  const CHART_SHAPE_BASELINE = 52340000;
+  const scale = currentTotal / CHART_SHAPE_BASELINE;
+  const data = genSeries(cfg.points, cfg.start*scale, cfg.vol);
+  data[data.length-1] = currentTotal; // 오늘 값은 실제 보유종목 평가금액으로 마무리
+  const principalData = genPrincipalSeries(cfg.points, currentPrincipal);
   const labels = data.map((_,i)=>cfg.labelFn(i));
   const ctx = document.getElementById('assetChart').getContext('2d');
   if(assetChart) assetChart.destroy();
@@ -969,7 +1008,7 @@ function renderAssetChart(period){
   grad.addColorStop(1,'rgba(49,130,246,0)');
   assetChart.update();
 }
-renderAssetChart('1m');
+// 초기 렌더링은 holdings/aggregateHoldings가 준비된 뒤 refreshHomeTab()에서 한 번에 처리해요.
 document.getElementById('periodTabs').addEventListener('click',e=>{
   if(e.target.tagName==='BUTTON'){
     document.querySelectorAll('#periodTabs button').forEach(b=>b.classList.remove('active'));
@@ -1178,10 +1217,45 @@ document.getElementById('addExchangeBtn').addEventListener('click',()=>{
 
 refreshFxTab();
 
-/* ===================== 비중 도넛 차트 ===================== */
+/* ===================== 현금 잔고 (원화 + 달러, 더미 저장 - 메모리) ===================== */
+let cashKrw = 0;
+let cashUsd = 0;
+
+function getTotalCashKrw(){
+  return cashKrw + cashUsd * liveFxRate; // 달러는 실시간 환율로 원화 환산
+}
+
+function renderCashStatus(){
+  const usdInKrw = cashUsd * liveFxRate;
+  document.getElementById('cashKrwStatus').textContent = fmtWon(Math.round(cashKrw));
+  document.getElementById('cashUsdStatus').textContent = '$'+cashUsd.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('cashUsdInKrwStatus').textContent = fmtWon(Math.round(usdInKrw));
+  document.getElementById('cashTotalStatus').textContent = fmtWon(Math.round(getTotalCashKrw()));
+}
+renderCashStatus();
+
+document.getElementById('saveCashBtn').addEventListener('click', ()=>{
+  const krwInput = document.getElementById('cashKrwInput').value;
+  const usdInput = document.getElementById('cashUsdInput').value;
+  const krw = krwInput === '' ? 0 : parseFloat(krwInput);
+  const usd = usdInput === '' ? 0 : parseFloat(usdInput);
+  if(isNaN(krw) || isNaN(usd) || krw < 0 || usd < 0){
+    showToast('현금 금액을 올바르게 입력해 주세요');
+    return;
+  }
+  cashKrw = krw;
+  cashUsd = usd;
+  renderCashStatus();
+  refreshHomeTab(); // 홈 탭의 현금·주식 비중 도넛에 반영
+  showToast('현금 잔고가 저장됐어요 (더미)');
+});
+
+/* ===================== 비중 도넛 차트 (보유종목 기준 실시간 계산) ===================== */
+const donutChartRegistry = {};
 function makeDonut(canvasId, labels, values, colors, legendId, formatter){
   const ctx = document.getElementById(canvasId).getContext('2d');
-  new Chart(ctx,{
+  if(donutChartRegistry[canvasId]) donutChartRegistry[canvasId].destroy();
+  donutChartRegistry[canvasId] = new Chart(ctx,{
     type:'doughnut',
     data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderWidth:0, hoverOffset:4 }]},
     options:{
@@ -1197,27 +1271,58 @@ function makeDonut(canvasId, labels, values, colors, legendId, formatter){
   legend.innerHTML = labels.map((l,i)=>`
     <div class="legend-item">
       <div class="legend-left"><span class="legend-dot" style="background:${colors[i]}"></span><span class="legend-name">${l}</span></div>
-      <span class="legend-value">${((values[i]/total)*100).toFixed(1)}%</span>
+      <span class="legend-value">${total ? ((values[i]/total)*100).toFixed(1) : '0.0'}%</span>
     </div>`).join('');
 }
+const STOCK_DONUT_PALETTE = ['#3182F6','#5B9AF8','#84B4FA','#ADCEFC','#1B64DA','#0B3B8C','#7EB2FA','#B9D6FE'];
 
-// 주식 비중 (종목별 평가금액)
-const stockValues = stocks.map(s=>s.price*s.shares);
-makeDonut('stockDonut', stocks.map(s=>s.name), stockValues,
-  ['#3182F6','#5B9AF8','#84B4FA','#ADCEFC','#1B64DA'], 'stockLegend', v=>fmtWon(v));
+// 보유종목(매수 입력) + 실시간 시세를 기준으로 세 도넛(주식비중/섹터비중/현금비중)을 다시 그림
+function renderAllocationCharts(){
+  const positions = aggregateHoldings();
+  const totalCashKrw = getTotalCashKrw();
 
-// 섹터 비중
-const sectorMap = {};
-stocks.forEach((s,i)=>{ sectorMap[s.sector] = (sectorMap[s.sector]||0) + stockValues[i]; });
-const sectorLabels = Object.keys(sectorMap);
-makeDonut('sectorDonut', sectorLabels, sectorLabels.map(k=>sectorMap[k]),
-  sectorLabels.map(l=>sectorColors[l]||'#BFDBFE'), 'sectorLegend', v=>fmtWon(v));
+  if(positions.length===0){
+    ['stockDonut','sectorDonut'].forEach(id=>{
+      if(donutChartRegistry[id]){ donutChartRegistry[id].destroy(); delete donutChartRegistry[id]; }
+    });
+    ['stockLegend','sectorLegend'].forEach(id=>{
+      document.getElementById(id).innerHTML = `<div class="empty-state">보유종목이 없어요.</div>`;
+    });
+  }else{
+    const rows = positions.map(p=>{
+      const match = findCatalogByName(p.name);
+      const live = !!(match && match.status==='ok' && typeof match.price==='number');
+      const price = live ? match.price : p.avgPrice; // 실시간 시세가 아직 없으면 실제 매수 평단가로 계산
+      return { name:p.name, value: price*p.qty, sector: (match && match.sector) || '기타' };
+    });
 
-// 현금/주식 비중
-const totalStockValue = stockValues.reduce((a,b)=>a+b,0);
-const cashValue = 52340000 - totalStockValue;
-makeDonut('cashDonut', ['주식','현금'], [totalStockValue, cashValue],
-  ['#3182F6','#E5E8EB'], 'cashLegend', v=>fmtWon(v));
+    // 주식 비중
+    makeDonut('stockDonut', rows.map(r=>r.name), rows.map(r=>r.value),
+      rows.map((_,i)=>STOCK_DONUT_PALETTE[i % STOCK_DONUT_PALETTE.length]), 'stockLegend', v=>fmtWon(Math.round(v)));
+
+    // 섹터 비중
+    const sectorMap = {};
+    rows.forEach(r=>{ sectorMap[r.sector] = (sectorMap[r.sector]||0) + r.value; });
+    const sectorLabels = Object.keys(sectorMap);
+    makeDonut('sectorDonut', sectorLabels, sectorLabels.map(k=>sectorMap[k]),
+      sectorLabels.map(l=>sectorColors[l]||'#BFDBFE'), 'sectorLegend', v=>fmtWon(Math.round(v)));
+  }
+
+  // 현금·주식 비중 — 현금 탭에서 입력한 실제 잔고(달러는 실시간 환율로 원화 환산)를 반영
+  const totalStockValue = positions.reduce((a,p)=>{
+    const match = findCatalogByName(p.name);
+    const live = !!(match && match.status==='ok' && typeof match.price==='number');
+    const price = live ? match.price : p.avgPrice;
+    return a + price*p.qty;
+  }, 0);
+  if(totalStockValue===0 && totalCashKrw===0){
+    if(donutChartRegistry['cashDonut']){ donutChartRegistry['cashDonut'].destroy(); delete donutChartRegistry['cashDonut']; }
+    document.getElementById('cashLegend').innerHTML = `<div class="empty-state">보유종목·현금이 없어요.</div>`;
+  }else{
+    makeDonut('cashDonut', ['주식','현금'], [totalStockValue, totalCashKrw],
+      ['#3182F6','#E5E8EB'], 'cashLegend', v=>fmtWon(Math.round(v)));
+  }
+}
 
 /* ===================== 매수 입력 (메모리 저장) ===================== */
 let holdings = [
@@ -1240,7 +1345,7 @@ function renderHoldings(){
     </div>
   `).join('');
 }
-function removeHolding(i){ holdings.splice(i,1); renderHoldings(); renderPortfolio(); }
+function removeHolding(i){ holdings.splice(i,1); renderHoldings(); renderPortfolio(); refreshHomeTab(); }
 renderHoldings();
 
 document.getElementById('addHoldingBtn').addEventListener('click',()=>{
@@ -1255,6 +1360,7 @@ document.getElementById('addHoldingBtn').addEventListener('click',()=>{
   holdings.unshift({name, qty, price, date});
   renderHoldings();
   renderPortfolio();
+  refreshHomeTab();
   document.getElementById('fName').value='';
   document.getElementById('fQty').value='';
   document.getElementById('fPrice').value='';
@@ -1276,6 +1382,64 @@ function aggregateHoldings(){
     map[h.name].cost += h.qty * h.price;
   });
   return Object.values(map).map(m=>({ name:m.name, qty:m.qty, avgPrice: m.cost/m.qty }));
+}
+
+// 홈 탭 총자산/수익 계산 — 보유종목 탭과 동일한 데이터(aggregateHoldings + 실시간 시세)를 기준으로 함
+function computePortfolioSummary(){
+  const positions = aggregateHoldings();
+  let totalEval = 0, totalCost = 0, dailyReturn = 0;
+  positions.forEach(p=>{
+    const match = findCatalogByName(p.name);
+    const live = !!(match && match.status==='ok' && typeof match.price==='number');
+    const price = live ? match.price : p.avgPrice; // 실시간 시세 전에는 실제 매수 평단가로 계산(가짜 숫자 아님)
+    const value = price * p.qty;
+    totalEval += value;
+    totalCost += p.avgPrice * p.qty;
+    if(live) dailyReturn += value * (match.changePct/100);
+  });
+  const totalReturn = totalEval - totalCost;
+  const totalReturnPct = totalCost ? (totalReturn/totalCost)*100 : 0;
+  const yesterdayEval = totalEval - dailyReturn;
+  const dailyReturnPct = yesterdayEval ? (dailyReturn/yesterdayEval)*100 : 0;
+  return { totalEval, totalCost, totalReturn, totalReturnPct, dailyReturn, dailyReturnPct, hasHoldings: positions.length>0 };
+}
+
+// 홈 탭 상단 요약 카드(총자산/원금/일간수익/총수익) 갱신
+function renderHomeSummary(){
+  const s = computePortfolioSummary();
+  const totalEl = document.getElementById('heroTotal');
+  const principalEl = document.getElementById('heroPrincipal');
+  const dailyEl = document.getElementById('heroDaily');
+  const totalReturnEl = document.getElementById('heroTotalReturn');
+
+  if(!s.hasHoldings){
+    totalEl.textContent = '0원';
+    principalEl.textContent = '원금 0원';
+    dailyEl.textContent = '0원 (0.00%)';
+    dailyEl.style.color = 'var(--sub)';
+    totalReturnEl.textContent = '0원 (0.00%)';
+    totalReturnEl.style.color = 'var(--sub)';
+    return;
+  }
+
+  totalEl.textContent = fmtWon(Math.round(s.totalEval));
+  principalEl.textContent = '원금 '+fmtWon(Math.round(s.totalCost));
+
+  const dColor = s.dailyReturn >= 0 ? '#FF6B81' : '#B9E1FF'; // 히어로 카드는 진한 배경이라 밝은 색 사용
+  dailyEl.textContent = `${s.dailyReturn>=0?'+':''}${fmtWon(Math.round(s.dailyReturn))} (${s.dailyReturnPct>=0?'+':''}${s.dailyReturnPct.toFixed(2)}%)`;
+  dailyEl.style.color = dColor;
+
+  const tColor = s.totalReturn >= 0 ? '#FF6B81' : '#B9E1FF';
+  totalReturnEl.textContent = `${s.totalReturn>=0?'+':''}${fmtWon(Math.round(s.totalReturn))} (${s.totalReturnPct>=0?'+':''}${s.totalReturnPct.toFixed(2)}%)`;
+  totalReturnEl.style.color = tColor;
+}
+
+// 홈 탭 전체(요약 카드 + 자산추이 그래프 + 비중 도넛)를 보유종목 데이터 기준으로 한 번에 갱신
+function refreshHomeTab(){
+  const activeBtn = document.querySelector('#periodTabs button.active');
+  renderAssetChart(activeBtn ? activeBtn.dataset.p : '1m');
+  renderHomeSummary();
+  renderAllocationCharts();
 }
 
 function renderPortfolio(){
@@ -1349,8 +1513,7 @@ function renderPortfolio(){
   });
 }
 renderPortfolio();
-
-/* ===================== 보유종목 상세 (클릭 시 확대 그래프 + 매수내역) ===================== */
+refreshHomeTab(); // 홈 탭도 보유종목 데이터 기준으로 초기 렌더링
 function generateHistory(days, endVal, vol, seedBase){
   let seed = seedBase;
   function rand(){ seed=(seed*9301+49297)%233280; return seed/233280; }
@@ -1787,6 +1950,7 @@ async function fetchAllLiveQuotes(){
   setLiveBadge('marketLiveBadge', anySuccess, firstError);
   renderStockList(); // 관심종목 시세 갱신
   renderPortfolio(); // 보유종목 탭도 같은 카탈로그 시세를 쓰므로 함께 갱신
+  refreshHomeTab(); // 홈 탭 총자산/그래프/비중도 같은 시세로 갱신
 }
 
 // ---------- ③ 공포 탐욕 지수 (CNN Fear & Greed) ----------
