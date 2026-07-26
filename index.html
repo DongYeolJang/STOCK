@@ -1684,6 +1684,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore(); // 다음 단계(마이페이지)에서 프로필 저장에 사용 예정
+// Firestore의 기본 WebChannel 스트리밍 연결이 광고차단기/일부 네트워크 환경에서 막혀
+// "client is offline" 오류가 나는 경우가 있어, 롱폴링으로 자동 전환되도록 설정해요.
+db.settings({ experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 
 function showAuthError(msg){
   const el = document.getElementById('authError');
@@ -1841,22 +1844,32 @@ document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
      Firebase Cloud Functions 같은 서버가 대신 호출해주는 구조로 바꾸는 걸 권장해요.
 */
 const CORS_PROXIES = [
-  target => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
-  target => `https://corsproxy.io/?url=${encodeURIComponent(target)}`,
   target => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}`,
+  target => `https://corsproxy.io/?url=${encodeURIComponent(target)}`,
+  target => `https://api.allorigins.win/get?url=${encodeURIComponent(target)}`, // /get은 JSON으로 감싸서 응답(아래서 별도 파싱)
+  target => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
 ];
 
-async function fetchJsonViaProxies(target){
+async function fetchJsonViaProxies(target, timeoutMs = 7000){
   let lastErr = null;
   for(const buildUrl of CORS_PROXIES){
     const proxyUrl = buildUrl(target);
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), timeoutMs);
     try{
-      const res = await fetch(proxyUrl);
+      const res = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timer);
       if(!res.ok) throw new Error('HTTP '+res.status);
-      return await res.json();
+      const data = await res.json();
+      // allorigins.win/get 은 { contents: "실제 JSON 문자열" } 형태로 감싸서 응답함
+      if(data && typeof data.contents === 'string'){
+        return JSON.parse(data.contents);
+      }
+      return data;
     }catch(e){
-      lastErr = e;
-      console.warn('[프록시 실패, 다음 프록시 시도]', proxyUrl, e.message);
+      clearTimeout(timer);
+      lastErr = e.name === 'AbortError' ? new Error('timeout') : e;
+      console.warn('[프록시 실패, 다음 프록시 시도]', proxyUrl, lastErr.message);
     }
   }
   throw lastErr || new Error('모든 프록시 시도 실패');
